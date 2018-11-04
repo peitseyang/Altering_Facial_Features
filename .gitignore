@@ -1,3 +1,7 @@
+.vscode/
+
 src/data/raw_data/img_align_celeba
 src/data/raw_data/list_attr_celeba.txt
-.vscode/
+
+src/data/celebA/attr.npy
+src/data/celebA/img.npy
