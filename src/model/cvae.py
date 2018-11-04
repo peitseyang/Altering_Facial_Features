@@ -3,11 +3,11 @@ import torch
 from torch import nn
 
 class CVAE(nn.Module):
-    def __int__(self, latent_size, num_labels):
+    def __int__(self, latent_size, num_labels=1):
         super(CVAE, self).__int__()
 
         self.latent_size = latent_size
-        self.lanum_labelsbel = num_labels
+        self.num_labels = num_labels
         
         self.encoder = Encoder(latent_size, num_labels)
         self.decoder = Decoder(latent_size, num_labels)

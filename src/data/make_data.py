@@ -90,7 +90,7 @@ def make_data():
 
 	f = open(attr_path)
 	f.readline()
-	labels_name = f.readline().split(' ')
+	# labels_name = f.readline().split(' ')
 	data_img = []
 	data_label = []
 	attr_index = attributes.index(opts.attr)
