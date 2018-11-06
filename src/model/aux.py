@@ -2,9 +2,9 @@
 import torch
 from torch import nn
 
-class AUX(nn.Module):
+class Aux(nn.Module):
     def __init__(self, latent_size, num_labels=1):
-        super(AUX, self).__init__()
+        super(Aux, self).__init__()
 
         self.latent_size = latent_size
         self.num_labels = num_labels
