@@ -1,27 +1,25 @@
 # pylint: disable=E0401, E0302
 import torch
 from torch import nn
+from torch.autograd import Variable
+import torch.nn.functional as F
+
+import numpy as np
 
 class CVAE(nn.Module):
-    def __init__(self, latent_size, num_labels=1):
+    def __init__(self, latent_size, device, num_labels=1):
         super(CVAE, self).__init__()
 
         self.latent_size = latent_size
         self.num_labels = num_labels
+        self.device = device
         
         self.encoder = Encoder(latent_size, num_labels)
         self.decoder = Decoder(latent_size, num_labels)
 
     def reparameterization(self, mean, log_var):
-        return 0
-    # def re_param(self, mu, log_var):
-		# #do the re-parameterising here
-		# sigma = torch.exp(log_var/2)  #sigma = exp(log_var/2) #torch.exp(log_var/2)
-		# if self.useCUDA:
-		# 	eps = Variable(torch.randn(sigma.size(0), self.nz).cuda())
-		# else: eps = Variable(torch.randn(sigma.size(0), self.nz))
-		
-		# return mu + sigma * eps  #eps.mul(simga)._add(mu)
+        e = Variable(torch.randn(log_var.size(0), self.latent_size)).to(self.device)
+        return mean + torch.exp(log_var/2) * e
 
     def forward(self, x):
         mean, log_var, y = self.encoder(x)
@@ -30,21 +28,15 @@ class CVAE(nn.Module):
 
         return rec, mean, log_var, y
 
-    def loss(self, rec_x, x, mean, log_var):
-        return 0
-    # def loss(self, rec_x, x, mu, logVar):
-	# 	sigma2 = Variable(torch.Tensor([self.sig]))
-	# 	if self.useCUDA:
-	# 		sigma2 = sigma2.cuda()
-	# 	logVar2 = torch.log(sigma2)
-	# 	#Total loss is BCE(x, rec_x) + KL
-	# 	BCE = F.binary_cross_entropy(rec_x, x, size_average=False)  #not averaged over mini-batch if size_average=FALSE and is averaged if =True 
-	# 	#(might be able to use nn.NLLLoss2d())
-	# 	if self.sig == 1:
-	# 		KL = 0.5 * torch.sum(mu ** 2 + torch.exp(logVar) - 1. - logVar) #0.5 * sum(1 + log(var) - mu^2 - var)
-	# 	else:
-	# 		KL = 0.5 * torch.sum(logVar2 - logVar + torch.exp(logVar) + (mu ** 2 / 2 * sigma2 ** 2) - 0.5)
-	# 	return BCE / (x.size(2) ** 2),  KL / mu.size(1)
+    def loss(self, rec, x, mean, log_var):
+        loss = nn.BCELoss(size_average=False)
+        bce = loss(rec, x)
+        # KL divergence is a useful distance measure for continuous distributions and is often useful when performing direct regression over the space of (discretely sampled) continuous output distributions.
+        # As with NLLLoss, the input given is expected to contain log-probabilities, however unlike ClassNLLLoss, input is not restricted to a 2D Tensor, because the criterion is applied element-wise.
+        # This criterion expects a target Tensor of the same size as the input Tensor.Ｆ
+        kl = 0.5 * torch.sum(mean ** 2 + torch.exp(log_var) - 1. - log_var)
+
+        return bce / (x.size(2) ** 2), kl / mean.size(1)
 
 class Encoder(nn.Module):
     def __init__(self, latent_size, num_labels):
@@ -103,7 +95,7 @@ class Decoder(nn.Module):
         )
         self.decoder3 = nn.Sequential(
             nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2, padding=1 ,output_padding=1),
-		    nn.BatchNorm2d(128)
+		    nn.BatchNorm2d(64)
         )
         self.decoder4 = nn.Sequential(
             nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2, padding=1 ,output_padding=1),
