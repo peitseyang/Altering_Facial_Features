@@ -3,8 +3,8 @@ import torch
 from torch import nn
 
 class CVAE(nn.Module):
-    def __int__(self, latent_size, num_labels=1):
-        super(CVAE, self).__int__()
+    def __init__(self, latent_size, num_labels=1):
+        super(CVAE, self).__init__()
 
         self.latent_size = latent_size
         self.num_labels = num_labels
@@ -15,13 +15,13 @@ class CVAE(nn.Module):
     def reparameterization(self, mean, log_var):
         return 0
     # def re_param(self, mu, log_var):
-	# 	#do the re-parameterising here
-	# 	sigma = torch.exp(log_var/2)  #sigma = exp(log_var/2) #torch.exp(log_var/2)
-	# 	if self.useCUDA:
-	# 		eps = Variable(torch.randn(sigma.size(0), self.nz).cuda())
-	# 	else: eps = Variable(torch.randn(sigma.size(0), self.nz))
+		# #do the re-parameterising here
+		# sigma = torch.exp(log_var/2)  #sigma = exp(log_var/2) #torch.exp(log_var/2)
+		# if self.useCUDA:
+		# 	eps = Variable(torch.randn(sigma.size(0), self.nz).cuda())
+		# else: eps = Variable(torch.randn(sigma.size(0), self.nz))
 		
-	# 	return mu + sigma * eps  #eps.mul(simga)._add(mu)
+		# return mu + sigma * eps  #eps.mul(simga)._add(mu)
 
     def forward(self, x):
         mean, log_var, y = self.encoder(x)
@@ -46,29 +46,28 @@ class CVAE(nn.Module):
 	# 		KL = 0.5 * torch.sum(logVar2 - logVar + torch.exp(logVar) + (mu ** 2 / 2 * sigma2 ** 2) - 0.5)
 	# 	return BCE / (x.size(2) ** 2),  KL / mu.size(1)
 
-
 class Encoder(nn.Module):
-    def __int__(self, latent_size, num_labels):
-        super(Encoder, self).__int__()
+    def __init__(self, latent_size, num_labels):
+        super(Encoder, self).__init__()
         # (3 * 64 * 64)
         self.encoder1 = nn.Sequential(
             nn.Conv2d(3, 32, kernel_size=5, stride=2, padding=2),
-            nn.ReLu()
+            nn.ReLU()
         )
         # (32 * 32 * 32)
         self.encoder2 = nn.Sequential(
             nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=2),
-            nn.ReLu()
+            nn.ReLU()
         )
         # (64 * 16 * 16)
         self.encoder3 = nn.Sequential(
             nn.Conv2d(64, 128, kernel_size=5, stride=2, padding=2),
-            nn.ReLu()
+            nn.ReLU()
         )
         # (128 * 8 * 8)
         self.encoder4 = nn.Sequential(
             nn.Conv2d(128, 256, kernel_size=5, stride=2, padding=2),
-            nn.ReLu()
+            nn.ReLU()
         )
         # (256 * 4 * 4)
         self.mean = nn.Linear(256*4*4, latent_size)
@@ -91,12 +90,12 @@ class Encoder(nn.Module):
         return mean, log_var, y
 
 class Decoder(nn.Module):
-    def __int__(self, latent_size, num_labels):
-        super(Decoder, self).__int__()
+    def __init__(self, latent_size, num_labels):
+        super(Decoder, self).__init__()
 
         self.decoder1 = nn.Sequential(
             nn.Linear(latent_size+1, 256*4*4),
-            nn.ReLu()
+            nn.ReLU()
         )
         self.decoder2 = nn.Sequential(
             nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2, padding=1 ,output_padding=1),
@@ -116,12 +115,12 @@ class Decoder(nn.Module):
         )
     
     def forward(self, y, z):
-        z = torch.cat([y, z], dim=1)
-        z = self.decoder1(z)
-        z = z.view(z.size(0), -1, 4, 4)
-        z = self.decoder2(z)
-        z = self.decoder3(z)
-        z = self.decoder4(z)
-        z = self.decoder5(z)
+        x = torch.cat([y, z], dim=1)
+        x = self.decoder1(x)
+        x = x.view(z.size(0), -1, 4, 4)
+        x = self.decoder2(x)
+        x = self.decoder3(x)
+        x = self.decoder4(x)
+        x = self.decoder5(x)
 
-        return z
+        return x

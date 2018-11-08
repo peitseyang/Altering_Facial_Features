@@ -1,5 +1,7 @@
 # pylint: disable=E0401
 import argparse
+from time import time
+import numpy as np
 
 from data.dataloader import CelebA
 from model.cvae import CVAE
@@ -7,16 +9,25 @@ from model.discriminator import Discriminator
 from model.aux import Aux
 
 from torchvision import transforms
+
 import torch
+from torch.autograd import Variable
+
+print(torch.__version__)
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--label', default='Smiling', type=str)
 parser.add_argument('--path', default='/Users/alexyang/Desktop/final_project/Altering_Facial_Features/src/data/celebA/', type=str)
+parser.add_argument('--batch_size', default=32, type=int)
 parser.add_argument('--latent_size', default=200, type=int)
+
 parser.add_argument('--lr', default=0.0002, type=float)
+parser.add_argument('--momentum', default=0.5, type=float)
 parser.add_argument('--weight_decay', default=0.01, type=int)
+
+parser.add_argument('--epochs', default=40, type=int)
 
 opts = parser.parse_args()
 
@@ -29,11 +40,11 @@ dataloader = {
 }
 
 
-cvae = CVAE(latent_size=opts.latent_size).to(device)
+cvae = CVAE(opts.latent_size).to(device)
 dis = Discriminator().to(device)
 # aux = Aux(latent_size=opts.latent_size)
-print(cvae)
-print(dis)
+# print(cvae)
+# print(dis)
 # print(aux)
 
 
@@ -44,3 +55,25 @@ optimizer_dis = torch.optim.RMSprop(dis.parameters(), lr=opts.lr, alpha=opts.mom
 # losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'test_bce':[], 'class':[], 'test_class':[], 'aux':[], 'auxEnc':[]}
 # Ns = len(trainLoader)*opts.batchSize  #no samples
 # Nb = len(trainLoader)  #no batches
+
+full_time = time()
+
+for epoch in range(opts.epochs):
+    cvae.train()
+    dis.train()
+
+    epoch_time = time()
+
+    for i, data in enumerate(dataloader['train'], 0):
+        x, y = data
+        x = Variable(x).to(device)
+        # Variable(y).view(y.size(0),1).type_as(x)
+        y = Variable(y).view(y.size(0),1).to(device)
+
+        rec, mean, log_var, predict = cvae(x)
+        print(rec)
+        print(mean)
+        print(log_var)
+        print(predict)
+        # z = cvae.reparameterization(mean, log_var)
+        break
