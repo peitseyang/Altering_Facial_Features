@@ -11,11 +11,11 @@ class Aux(nn.Module):
 
         self.aux1 = nn.Sequential(
             nn.Linear(latent_size, 1000),
-            nn.ReLu()
+            nn.ReLU()
         )
         self.aux2 = nn.Sequential(
             nn.Linear(1000, 1000),
-            nn.ReLu()
+            nn.ReLU()
         )
         self.aux3 = nn.Sequential(
             nn.Linear(1000, num_labels),

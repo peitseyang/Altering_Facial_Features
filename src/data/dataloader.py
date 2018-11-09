@@ -99,14 +99,14 @@ def UnitTest(label):
     img.save(str(label) + '.png')
     img.show()
 
-
-try:
-    if len(sys.argv) == 2 and attributes.index(sys.argv[1]) > 0:
-        UnitTest(sys.argv[1])
-    else:
-        UnitTest('Smiling')
-except ValueError:
-    print('Attribute is not in the list')
+if __name__ == '__main__':
+    try:
+        if len(sys.argv) == 2 and attributes.index(sys.argv[1]) > 0:
+            UnitTest(sys.argv[1])
+        else:
+            UnitTest('Smiling')
+    except ValueError:
+        print('Attribute is not in the list')
 
 
 

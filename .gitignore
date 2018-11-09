@@ -5,6 +5,9 @@ src/data/raw_data/list_attr_celeba.txt
 
 src/data/celebA/attr.npy
 src/data/celebA/img.npy
+src/data/__pycache__
 
 src/data/1.png
 src/data/0.png
+
+src/model/__pycache__
