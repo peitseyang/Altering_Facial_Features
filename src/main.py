@@ -114,7 +114,7 @@ for epoch in range(opts.epochs):
         ####
         dis_real = dis(x)
         dis_fake_rec = dis(rec.detach())
-        randn_z = Variable(torch.randn(opts.batch_size, opts.latent_size)).to(device)
+        randn_z = Variable(torch.randn(y.size(0), opts.latent_size)).to(device)
         randn_y = y.type_as(x)
         dis_fake_randn = dis(cvae.decoder(randn_y, randn_z).detach())
         label_fake = Variable(torch.Tensor(dis_real.size()).zero_()).type_as(dis_real)
