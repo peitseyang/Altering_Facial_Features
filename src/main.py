@@ -50,7 +50,7 @@ dataloader = {
 
 cvae = CVAE(opts.latent_size, device).to(device)
 dis = Discriminator().to(device)
-aux = Aux(latent_size=opts.latent_size)
+aux = Aux(latent_size=opts.latent_size).to(device)
 # print(cvae)
 # print(dis)
 # print(aux)
