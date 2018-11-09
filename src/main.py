@@ -142,13 +142,13 @@ for epoch in range(opts.epochs):
 
 
         e_loss += en_de_coder_loss.item()
-        e_rec_loss = rec_loss.item()
-        e_kl_loss = kl_loss.item()
-        e_class_loss = class_loss.item()
-        e_dis_loss = dis_loss.item()
-        e_gen_loss = gen_loss.item()
-        e_aux_loss = aux_loss.item()
-        e_aux_en_loss = aux_en_loss.item()
+        e_rec_loss += rec_loss.item()
+        e_kl_loss += kl_loss.item()
+        e_class_loss += class_loss.item()
+        e_dis_loss += dis_loss.item()
+        e_gen_loss += gen_loss.item()
+        e_aux_loss += aux_loss.item()
+        e_aux_en_loss += aux_en_loss.item()
 
         if i%100==1:
             i+=1
