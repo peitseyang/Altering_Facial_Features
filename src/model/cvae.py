@@ -2,7 +2,7 @@
 import torch
 from torch import nn
 from torch.autograd import Variable
-import torch.nn.functional as F
+# import torch.nn.functional as F
 
 import numpy as np
 
@@ -36,7 +36,10 @@ class CVAE(nn.Module):
         # This criterion expects a target Tensor of the same size as the input Tensor.Ｆ
         kl = 0.5 * torch.sum(mean ** 2 + torch.exp(log_var) - 1. - log_var)
 
-        return bce / (x.size(2) ** 2), kl / mean.size(1)
+        # print(bce)
+        # print(kl)
+
+        return bce / (64 * 64), kl / self.latent_size
 
 class Encoder(nn.Module):
     def __init__(self, latent_size, num_labels):
@@ -116,3 +119,4 @@ class Decoder(nn.Module):
         x = self.decoder5(x)
 
         return x
+        
