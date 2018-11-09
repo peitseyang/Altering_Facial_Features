@@ -110,7 +110,10 @@ class Decoder(nn.Module):
         )
     
     def forward(self, y, z):
+        print(np.shape(y))
+        print(np.shape(z))
         x = torch.cat([y, z], dim=1)
+        print(np.shape(x))
         x = self.decoder1(x)
         x = x.view(z.size(0), -1, 4, 4)
         x = self.decoder2(x)
