@@ -166,14 +166,14 @@ for epoch in range(opts.epochs):
             zeroIdx = torch.nonzero(y.data)
             x0 = Variable(torch.index_select(x, dim=0, index=zeroIdx[:,0])).type_as(x)
 
-        mean, log_var, y = cvae(x0)
+        mean, log_var, y = cvae.encoder(x0)
         z = cvae.reparameterization(mean, log_var)
 
         y_smile = Variable(torch.eye(2)[torch.LongTensor(np.ones(y.size(0), dtype=int))]).type_as(z)
-        smile = cvae.decode(y_smile, z).cpu()
+        smile = cvae.decoder(y_smile, z).cpu()
 
         y_no_smile = Variable(torch.eye(2)[torch.LongTensor(np.zeros(y.size(0), dtype=int))]).type_as(z)
-        no_smile = cvae.decode(y_no_smile, z).cpu()
+        no_smile = cvae.decoder(y_no_smile, z).cpu()
 
         print('saving')
         save_image(x0.data, './ex/original_' + str(epoch) + '.png')
