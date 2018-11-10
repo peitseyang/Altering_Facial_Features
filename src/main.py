@@ -154,28 +154,30 @@ for epoch in range(opts.epochs):
             i+=1
             print('[%d, %d] loss: %0.5f, gen: %0.5f, dis: %0.5f, bce: %0.5f, kl: %0.5f, aux: %0.5f, time: %0.3f' % \
                (epoch, i, e_loss/i, e_dis_loss/i, e_gen_loss/i, e_rec_loss/i, e_kl_loss/i, e_aux_loss/i, time() - s_epoch_time))
-    if epoch % 5 == 4:
-        cvae.eval()
-        x, y = iter(dataloader['test']).next()
-        x = Variable(x).to(device)
-        y = Variable(y).view(y.size(0),1).to(device)
+    # if epoch % 5 == 4:
+    cvae.eval()
+    x, y = iter(dataloader['test']).next()
+    x = Variable(x).to(device)
+    y = Variable(y).view(y.size(0),1).to(device)
 
-        if (y.data == 0).all():
-            x0 = x
-        else:
-            zeroIdx = torch.nonzero(y.data)
-            x0 = Variable(torch.index_select(x, dim=0, index=zeroIdx[:,0])).type_as(x)
+    if (y.data == 0).all():
+        x0 = x
+    else:
+        zeroIdx = torch.nonzero(y.data)
+        x0 = Variable(torch.index_select(x, dim=0, index=zeroIdx[:,0])).type_as(x)
 
-        mean, log_var, y = cvae.encoder(x0)
-        z = cvae.reparameterization(mean, log_var)
+    mean, log_var, y = cvae.encoder(x0)
+    z = cvae.reparameterization(mean, log_var)
 
-        y_smile = Variable(torch.eye(2)[torch.LongTensor(np.ones(y.size(0), dtype=int))]).type_as(z)
-        smile = cvae.decoder(y_smile, z).cpu()
+    y_smile = Variable(torch.eye(2)[torch.LongTensor(np.ones(y.size(0), dtype=int))]).type_as(z)
+    print(np.shape(y_smile))
+    print(np.shape(z))
+    smile = cvae.decoder(y_smile, z).cpu()
 
-        y_no_smile = Variable(torch.eye(2)[torch.LongTensor(np.zeros(y.size(0), dtype=int))]).type_as(z)
-        no_smile = cvae.decoder(y_no_smile, z).cpu()
+    y_no_smile = Variable(torch.eye(2)[torch.LongTensor(np.zeros(y.size(0), dtype=int))]).type_as(z)
+    no_smile = cvae.decoder(y_no_smile, z).cpu()
 
-        print('saving')
-        save_image(x0.data, './ex/original_' + str(epoch) + '.png')
-        save_image(smile, './ex/smile_' + str(epoch) + '.png')
-        save_image(no_smile, './ex/no_smile_' + str(epoch) + '.png')
+    print('saving')
+    save_image(x0.data, './ex/original_' + str(epoch) + '.png')
+    save_image(smile, './ex/smile_' + str(epoch) + '.png')
+    save_image(no_smile, './ex/no_smile_' + str(epoch) + '.png')
