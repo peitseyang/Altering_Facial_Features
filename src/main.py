@@ -169,12 +169,10 @@ for epoch in range(opts.epochs):
     mean, log_var, y = cvae.encoder(x0)
     z = cvae.reparameterization(mean, log_var)
 
-    y_smile = Variable(torch.eye(2)[torch.LongTensor(np.ones(y.size(0), dtype=int))]).type_as(z)
-    print(np.shape(y_smile))
-    print(np.shape(z))
+    y_smile = Variable(torch.LongTensor(np.ones(y.size(), dtype=int))).type_as(z)
     smile = cvae.decoder(y_smile, z).cpu()
 
-    y_no_smile = Variable(torch.eye(2)[torch.LongTensor(np.zeros(y.size(0), dtype=int))]).type_as(z)
+    y_no_smile = Variable(torch.LongTensor(np.zeros(y.size(), dtype=int))).type_as(z)
     no_smile = cvae.decoder(y_no_smile, z).cpu()
 
     print('saving')
