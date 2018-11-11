@@ -87,9 +87,17 @@ for epoch in range(opts.epochs):
         y = Variable(y).view(y.size(0),1).to(device)
 
         rec, mean, log_var, predict = cvae(x)
+        print('rec', rec)
+        print('mean', mean)
+        print('log_var', log_var)
+        print('predict', predict)
         z = cvae.reparameterization(mean, log_var)
+        print('z', z)
         rec_loss, kl_loss = cvae.loss(rec, x, mean, log_var)
+        print('rec_loss', rec_loss)
+        print('kl_loss', kl_loss)
         en_de_coder_loss = rec_loss + opts.p1 * kl_loss
+        print('en_de_coder_loss', en_de_coder_loss)
 
         ###
         loss = nn.BCELoss()
@@ -150,6 +158,8 @@ for epoch in range(opts.epochs):
         e_aux_loss += aux_loss.item()
         e_aux_en_loss += aux_en_loss.item()
 
+        break
+
         if i%100==1:
             i+=1
             print('[%d, %d] loss: %0.5f, gen: %0.5f, dis: %0.5f, bce: %0.5f, kl: %0.5f, aux: %0.5f, time: %0.3f' % \
@@ -176,6 +186,6 @@ for epoch in range(opts.epochs):
     no_smile = cvae.decoder(y_no_smile, z).cpu()
 
     print('saving')
-    save_image(x0.data, './ex/original_' + str(epoch) + '.png')
+    save_image(x0.data, './ex/original.png')
     save_image(smile, './ex/smile_' + str(epoch) + '.png')
     save_image(no_smile, './ex/no_smile_' + str(epoch) + '.png')
