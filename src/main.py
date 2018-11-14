@@ -87,17 +87,17 @@ for epoch in range(opts.epochs):
         y = Variable(y).view(y.size(0),1).to(device)
 
         rec, mean, log_var, predict = cvae(x)
-        print('rec', rec)
-        print('mean', mean)
-        print('log_var', log_var)
-        print('predict', predict)
+        # print('rec', rec)
+        # print('mean', mean)
+        # print('log_var', log_var)
+        # print('predict', predict)
         z = cvae.reparameterization(mean, log_var)
-        print('z', z)
+        # print('z', z)
         rec_loss, kl_loss = cvae.loss(rec, x, mean, log_var)
-        print('rec_loss', rec_loss)
-        print('kl_loss', kl_loss)
+        # print('rec_loss', rec_loss)
+        # print('kl_loss', kl_loss)
         en_de_coder_loss = rec_loss + opts.p1 * kl_loss
-        print('en_de_coder_loss', en_de_coder_loss)
+        # print('en_de_coder_loss', en_de_coder_loss)
 
         ###
         loss = nn.BCELoss()
