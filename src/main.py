@@ -128,13 +128,13 @@ for epoch in range(opts.epochs):
         label_fake = Variable(torch.Tensor(dis_real.size()).zero_()).type_as(dis_real)
         label_real = Variable(torch.Tensor(dis_real.size()).fill_(1)).type_as(dis_real)
         loss = nn.BCELoss(size_average=False)
-        dis_loss = 0.3 * loss(dis_real, label_real) + loss(dis_fake_randn, label_fake) + loss(dis_fake_randn, label_fake) / dis_real.size(1)
+        dis_loss = 0.3 * (loss(dis_real, label_real) + loss(dis_fake_randn, label_fake) + loss(dis_fake_randn, label_fake)) / dis_real.size(1)
         ####
 
         #####
         dis_fake_rec = dis(rec)
         dis_fake_randn = dis(cvae.decoder(randn_y, randn_z))
-        gen_loss = 0.5 * loss(dis_fake_rec, label_real) + loss(dis_fake_randn, label_real) / dis_fake_rec.size(1)
+        gen_loss = 0.5 * (loss(dis_fake_rec, label_real) + loss(dis_fake_randn, label_real)) / dis_fake_rec.size(1)
         en_de_coder_loss += opts.p5 * gen_loss
         #####
         
