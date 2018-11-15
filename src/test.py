@@ -182,24 +182,24 @@ if __name__=='__main__':
 
 
 	####### Create model #######
-	cvae = CVAE1(nz=opts.nz, imSize=64, fSize=opts.fSize)
-	dis = DISCRIMINATOR(imSize=64, fSize=opts.fSize) 
-	aux = AUX(nz=opts.nz)
-	classer = CLASSIFIER(imSize=64, fSize=64) #for eval only! 
+	cvae = CVAE1(opts.nz, 'cuda:0').cuda()
+	dis = DISCRIMINATOR().cuda()
+	aux = AUX(latent_size=opts.nz).cuda()
+	# classer = CLASSIFIER(imSize=64, fSize=64).cuda() #for eval only! 
 
-	if cvae.useCUDA:
-		print('using CUDA')
-		cvae.cuda()
-		dis.cuda()
-		aux.cuda()
-		classer.cuda()
-	else: print('\n *** NOT USING CUDA ***\n')
+	# if cvae.useCUDA:
+	# 	print('using CUDA')
+	# 	cvae.cuda()
+	# 	dis.cuda()
+	# 	aux.cuda()
+	# 	classer.cuda()
+	# else: print('\n *** NOT USING CUDA ***\n')
 
 	#load model is applicable
 	if opts.load_VAE_from is not None:
 		cvae.load_params(opts.load_VAE_from)
 
-	if opts.evalMode:
+	# if opts.evalMode:
 		classer.load_params(opts.load_CLASSER_from)
 
 		assert opts.load_VAE_from is not None
