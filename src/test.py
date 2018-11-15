@@ -173,10 +173,10 @@ if __name__=='__main__':
 	####### Data set #######
 	print('Prepare data loaders...')
 	transform = transforms.Compose([transforms.ToTensor(), transforms.RandomHorizontalFlip()])
-	trainDataset = CELEBA(label=opts.label, path=opts.path, transform=transforms.ToTensor())
+	trainDataset = CELEBA(label=opts.label, path=opts.root, transform=transforms.ToTensor())
 	trainLoader = torch.utils.data.DataLoader(trainDataset, batch_size=opts.batchSize, shuffle=True)
 
-	testDataset = CELEBA(label=opts.label, path=opts.path, train=False, transform=transforms.ToTensor())
+	testDataset = CELEBA(label=opts.label, path=opts.root, train=False, transform=transforms.ToTensor())
 	testLoader = torch.utils.data.DataLoader(testDataset, batch_size=opts.batchSize, shuffle=False)
 	print('Data loaders ready.')
 
