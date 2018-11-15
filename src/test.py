@@ -149,20 +149,20 @@ def evaluate(cvae, testLoader, exDir, e=1, classifier=None):  #e is the epoch
 	rec1, rec0 = label_switch_1(xTest.data, yTest, cvae, exDir=exDir)
 
 	# for further eval
-	if e == 'evalMode' and classer is not None:
-		classer.eval()
-		yPred0 = classer(rec0)
-		y0 = Variable(torch.LongTensor(yPred0.size()).fill_(0)).type_as(yTest)
-		class0 = binary_class_score(yPred0, y0, thresh=0.5)
-		yPred1 = classer(rec1)
-		y1 = Variable(torch.LongTensor(yPred1.size()).fill_(1)).type_as(yTest)
-		class1 = binary_class_score(yPred1, y1, thresh=0.5)
+	# if e == 'evalMode' and classer is not None:
+	# 	classer.eval()
+	# 	yPred0 = classer(rec0)
+	# 	y0 = Variable(torch.LongTensor(yPred0.size()).fill_(0)).type_as(yTest)
+	# 	class0 = binary_class_score(yPred0, y0, thresh=0.5)
+	# 	yPred1 = classer(rec1)
+	# 	y1 = Variable(torch.LongTensor(yPred1.size()).fill_(1)).type_as(yTest)
+	# 	class1 = binary_class_score(yPred1, y1, thresh=0.5)
 
-		f = open(join(exDir, 'eval.txt'), 'w')
-		f.write('Test MSE:'+ str(F.mse_loss(outputs, xTest).data[0]))
-		f.write('Class0:'+ str(class0.data[0]))
-		f.write('Class1:'+ str(class1.data[0]))
-		f.close()
+	# 	f = open(join(exDir, 'eval.txt'), 'w')
+	# 	f.write('Test MSE:'+ str(F.mse_loss(outputs, xTest).data[0]))
+	# 	f.write('Class0:'+ str(class0.data[0]))
+	# 	f.write('Class1:'+ str(class1.data[0]))
+	# 	f.close()
 
 
 	return (bceLossTest).data[0]/xTest.size(0), classScoreTest.data[0]
@@ -256,7 +256,7 @@ if __name__=='__main__':
 			#VAE loss
 			outRec, outMu, outLogVar, predY = cvae(x)
 			z = cvae.reparameterization(outMu, outLogVar)
-			bceLoss, klLoss = cvae.loss(rec_x=outRec, x=x, mu=outMu, logVar=outLogVar)
+			bceLoss, klLoss = cvae.loss(outRec, x, outMu, outLogVar)
 			vaeLoss = bceLoss + opts.alpha * klLoss
 
 			#Classification loss #not on reconstructed sample
