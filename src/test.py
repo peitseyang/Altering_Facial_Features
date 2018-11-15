@@ -250,7 +250,7 @@ if __name__=='__main__':
 
 		for i, data in enumerate(trainLoader, 0):
 			
-			x, y = prep_data(data, cvae.useCUDA)
+			x, y = prep_data(data, True)
 
 			#get ouput, clac loss, calc all grads, optimise
 			#VAE loss
