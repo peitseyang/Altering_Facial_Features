@@ -162,7 +162,7 @@ for epoch in range(opts.epochs):
             i+=1
             print('[%d, %d] loss: %0.5f, gen: %0.5f, dis: %0.5f, bce: %0.5f, kl: %0.5f, aux: %0.5f, time: %0.3f' % \
                (epoch, i, e_loss/i, e_dis_loss/i, e_gen_loss/i, e_rec_loss/i, e_kl_loss/i, e_aux_loss/i, time() - s_epoch_time))
-    if epoch % 5 == 4:
+    if epoch % 1 == 0:
         cvae.eval()
         x, y = iter(dataloader['test']).next()
         x = Variable(x).to(device)
