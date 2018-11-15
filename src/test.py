@@ -137,7 +137,7 @@ def evaluate(cvae, testLoader, exDir, e=1, classifier=None):  #e is the epoch
 	outputs, outMu, outLogVar, outY = cvae(xTest)
 
 
-	bceLossTest, klLossTest = cvae.loss(rec_x=outputs, x=xTest, mu=outMu, logVar=outLogVar)
+	bceLossTest, klLossTest = cvae.loss(outputs, xTest, outMu, outLogVar)
 	predLabel = torch.floor(outY)
 
 	classScoreTest= binary_class_score(predLabel, yTest, thresh=0.5)
