@@ -200,18 +200,18 @@ if __name__=='__main__':
 		cvae.load_params(opts.load_VAE_from)
 
 	# if opts.evalMode:
-		classer.load_params(opts.load_CLASSER_from)
+		# classer.load_params(opts.load_CLASSER_from)
 
-		assert opts.load_VAE_from is not None
-		#make a new folder to save eval results w/out affecting others
-		evalDir=join(opts.load_VAE_from,'evalFolder')
-		print('Eval results will be saved to', evalDir)
-		try:  #may already have an eval folder
-			os.mkdir(evalDir)
-		except:
-			print('file already created')
-		_, _ = evaluate(cvae, testLoader, evalDir, e='evalMode', classifier=classer)
-		exit()
+		# assert opts.load_VAE_from is not None
+		# #make a new folder to save eval results w/out affecting others
+		# evalDir=join(opts.load_VAE_from,'evalFolder')
+		# print('Eval results will be saved to', evalDir)
+		# try:  #may already have an eval folder
+		# 	os.mkdir(evalDir)
+		# except:
+		# 	print('file already created')
+		# _, _ = evaluate(cvae, testLoader, evalDir, e='evalMode', classifier=classer)
+		# exit()
 
 
 	print(cvae)
