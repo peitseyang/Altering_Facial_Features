@@ -12,7 +12,7 @@ from os.path import join
 class CVAE(nn.Module):
 
 	def __init__(self, latent_size, device, num_labels=1):
-		super(CVAE1, self).__init__()
+		super(CVAE, self).__init__()
 		#define layers here
 
 		self.latent_size = latent_size
@@ -30,7 +30,7 @@ class CVAE(nn.Module):
 		return rec, mean, log_var ,y
 
 	def reparameterization(self, mean, log_var):
-		e = Variable(torch.randn(log_var.size(0), self.latent_size)).to('cuda:0')
+		e = Variable(torch.randn(log_var.size(0), self.latent_size)).to(self.device)
 		return mean + torch.exp(log_var/2) * e
 
 	def loss(self, rec, x, mean, log_var):
