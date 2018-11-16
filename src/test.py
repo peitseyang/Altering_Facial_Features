@@ -111,11 +111,11 @@ def evaluate(cvae, testLoader, exDir, e=1, classifier=None):  #e is the epoch
 	cvae.eval()
 
 	#Load test data
-	xTest, yTest = prep_data(iter(testLoader).next(), cvae.useCUDA)
+	xTest, yTest = prep_data(iter(testLoader).next(), True)
 	
 
 	print('saving a set of samples')
-	if cvae.useCUDA:
+	if True:
 		z = Variable(torch.randn(xTest.size(0), opts.latent_size).cuda())
 	else:
 		z = Variable(torch.randn(xTest.size(0), opts.latent_size))
@@ -296,7 +296,7 @@ if __name__=='__main__':
 			#DIS loss
 			dis_real = dis(x)
 			dis_fake_rec = dis(rec.detach())
-			randn_z = sample_z(x.size(0), opts.latent_size, cvae.useCUDA)
+			randn_z = sample_z(x.size(0), opts.latent_size, True)
 			randn_y = y.type_as(x)
 			dis_fake_randn = dis(cvae.decode(randn_y, randn_z).detach())
 			label_fake = Variable(torch.Tensor(dis_real.size()).zero_()).type_as(dis_real)
