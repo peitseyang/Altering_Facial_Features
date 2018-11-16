@@ -28,13 +28,3 @@ class Discriminator(nn.Module):
 		x = self.flatten(x)
 		
 		return x
-
-
-	# def save_params(self, exDir):
-	# 	print('saving params...')
-	# 	torch.save(self.state_dict(), join(exDir,'class_dis_params'))
-
-
-	# def load_params(self, exDir):
-	# 	print('loading params...')
-	# 	self.load_state_dict(torch.load(join(exDir,'class_dis_params')))

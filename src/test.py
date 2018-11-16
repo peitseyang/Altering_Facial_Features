@@ -30,36 +30,6 @@ EPSILON = 1e-6
 
 # python3 celeba_info_cVAEGAN.py --alpha 0.2 --batch_size 32 --beta 0 --delta 0.1 --fSize 32 --epochs 45 --rho 0.1
 
-def get_args():
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--label', default='Smiling', type=str)
-	parser.add_argument('--path', default='/home/csie-owob/alexyang/yerin/Altering_Facial_Features/src/data/celebA/', type=str)
-	parser.add_argument('--batch_size', default=32, type=int)
-	parser.add_argument('--latent_size', default=200, type=int)
-
-	parser.add_argument('--lr', default=0.0002, type=float)
-	parser.add_argument('--momentum', default=0.5, type=float)
-	parser.add_argument('--weight_decay', default=0.01, type=float)
-
-	parser.add_argument('--epochs', default=10, type=int)
-
-	parser.add_argument('--alpha', default=1, type=float, help='p1') #weight on the KL divergance
-	parser.add_argument('--rho', default=1, type=float, help='p2') #weight on the class loss for the vae
-	parser.add_argument('--beta', default=1, type=float, help='p3')  #weight on the rec class loss to update VAE
-	parser.add_argument('--gamma', default=1, type=float, help='p4') #weight on the aux enc loss
-	parser.add_argument('--delta', default=1, type=float, help='p5') #weight on the adversarial loss
-	
-	parser.add_argument('--fSize', default=64, type=int)  #multiple of filters to use
-	parser.add_argument('--outDir', default='./ex', type=str)
-	parser.add_argument('--commit', default='None', type=str)
-	parser.add_argument('--comments', type=str)
-	parser.add_argument('--load_VAE_from', default=None, type=str)
-	parser.add_argument('--load_CLASSER_from', default='../../Experiments_delta_z/celeba_joint_VAE_DZ/Ex_15', type=str)
-	parser.add_argument('--evalMode', action='store_true')
-	
-
-	return parser.parse_args()
-
 def prep_data(data, useCUDA):
 	x, y = data
 	if useCUDA:
@@ -183,34 +153,50 @@ if __name__=='__main__':
 	print('pytorch version : ' + str(torch.__version__))
 
 	device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+	
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--label', default='Smiling', type=str)
+	parser.add_argument('--path', default='/home/csie-owob/alexyang/yerin/Altering_Facial_Features/src/data/celebA/', type=str)
+	parser.add_argument('--batch_size', default=32, type=int)
+	parser.add_argument('--latent_size', default=200, type=int)
 
-	opts = get_args()
+	parser.add_argument('--lr', default=0.0002, type=float)
+	parser.add_argument('--momentum', default=0.5, type=float)
+	parser.add_argument('--weight_decay', default=0.01, type=float)
 
-	####### Data set #######
-	print('Prepare data loaders...')
-	# transform = transforms.Compose([transforms.ToTensor(), transforms.RandomHorizontalFlip()])
+	parser.add_argument('--epochs', default=10, type=int)
+
+	parser.add_argument('--alpha', default=1, type=float, help='p1') #weight on the KL divergance
+	parser.add_argument('--rho', default=1, type=float, help='p2') #weight on the class loss for the vae
+	parser.add_argument('--beta', default=1, type=float, help='p3')  #weight on the rec class loss to update VAE
+	parser.add_argument('--gamma', default=1, type=float, help='p4') #weight on the aux enc loss
+	parser.add_argument('--delta', default=1, type=float, help='p5') #weight on the adversarial loss
+	
+	parser.add_argument('--fSize', default=64, type=int)  #multiple of filters to use
+	parser.add_argument('--outDir', default='./ex', type=str)
+	parser.add_argument('--commit', default='None', type=str)
+	parser.add_argument('--comments', type=str)
+	parser.add_argument('--load_VAE_from', default=None, type=str)
+	parser.add_argument('--load_CLASSER_from', default='../../Experiments_delta_z/celeba_joint_VAE_DZ/Ex_15', type=str)
+	parser.add_argument('--evalMode', action='store_true')
+	
+
+	opts = parser.parse_args()
+
+
 	train_dataset = CelebA(label=opts.label, path=opts.path, transform=transforms.ToTensor())
 	test_dataset = CelebA(label=opts.label, path=opts.path, train=False, transform=transforms.ToTensor())
 	dataloader = {
 		'train': torch.utils.data.DataLoader(train_dataset, batch_size=opts.batch_size, shuffle=True),
 		'test': torch.utils.data.DataLoader(test_dataset, batch_size=opts.batch_size, shuffle=False)
 	}
-	print('Data loaders ready.')
 
 
-	####### Create model #######
 	cvae = CVAE(opts.latent_size, device).to(device)
 	dis = Discriminator().to(device)
 	aux = Aux(opts.latent_size).to(device)
 	classer = CLASSIFIER().to(device) #for eval only! 
 
-	# if cvae.useCUDA:
-	# 	print('using CUDA')
-	# 	cvae.cuda()
-	# 	dis.cuda()
-	# 	aux.cuda()
-	# 	classer.cuda()
-	# else: print('\n *** NOT USING CUDA ***\n')
 
 	# #load model is applicable
 	# if opts.load_VAE_from is not None:
@@ -235,7 +221,7 @@ if __name__=='__main__':
 	print(dis)
 	print(aux)
 
-	####### Define optimizer #######
+
 	optimizer_cvae = torch.optim.RMSprop(cvae.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)
 	optimizer_dis = torch.optim.RMSprop(dis.parameters(), lr=opts.lr, alpha=opts.momentum, weight_decay=opts.weight_decay)
 	optimizer_aux = torch.optim.RMSprop(aux.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)
@@ -246,10 +232,13 @@ if __name__=='__main__':
 	# save_input_args(exDir, opts)  #save training opts
 
 
-	losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'test_bce':[], 'class':[], 'test_class':[], 'aux':[], 'auxEnc':[]}
-	Ns = len(dataloader['train'])*opts.batch_size  #no samples
-	Nb = len(dataloader['train'])  #no batches
-	####### Start Training #######
+	# losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'test_bce':[], 'class':[], 'test_class':[], 'aux':[], 'auxEnc':[]}
+	# Ns = len(dataloader['train'])*opts.batch_size  #no samples
+	# Nb = len(dataloader['train'])  #no batches
+
+
+	s_full_time = time()
+
 	for e in range(opts.epochs):
 		cvae.train()
 		dis.train()
@@ -270,6 +259,7 @@ if __name__=='__main__':
 			x = Variable(x).to(device)
 			y = Variable(y).view(y.size(0),1).to(device)
 
+
 			rec, mean, log_var, predict = cvae(x)
 			z = cvae.reparameterization(mean, log_var)
 			rec_loss, kl_loss = cvae.loss(rec, x, mean, log_var)
@@ -279,21 +269,17 @@ if __name__=='__main__':
 			class_loss = loss(predict.type_as(x), y.type_as(x))
 			en_de_coder_loss += opts.rho * class_loss
 
-			#Class loss on reconstruction
 			rec_mean, rec_log_var, rec_predict = cvae.encode(rec)
 			rec_class_loss = loss(rec_predict.type_as(x), y.type_as(x))
 			en_de_coder_loss += opts.beta * rec_class_loss
 
-			#Train the encoder to NOT predict y from z
-			auxY = aux(z)  #not detached update the encoder!
+			auxY = aux(z)
 			aux_en_loss = loss(auxY.type_as(x), y.type_as(x))  
 			en_de_coder_loss -= opts.gamma * aux_en_loss
 
-			#Train the aux net to predict y from z
 			auxY = aux(z.detach())  #detach: to ONLY update the AUX net #the prediction here for GT being predY
 			aux_loss = loss(auxY.type_as(x), y.type_as(x)) #correct order  #predY is a Nx2 use 2nd col.
 			
-			#DIS loss
 			dis_real = dis(x)
 			dis_fake_rec = dis(rec.detach())
 			randn_z = sample_z(x.size(0), opts.latent_size, True)
@@ -304,28 +290,22 @@ if __name__=='__main__':
 			loss = nn.BCELoss(size_average=False)
 			dis_loss = 0.3 * (loss(dis_real, label_real) + loss(dis_fake_rec, label_fake) + loss(dis_fake_randn, label_fake)) / dis_real.size(1)
 
-
-			#GEN loss
 			dis_fake_rec = dis(rec)
 			dis_fake_randn = dis(cvae.decode(randn_y, randn_z))
 			gen_loss = 0.5 * (loss(dis_fake_rec, label_real) + loss(dis_fake_randn, label_real)) / dis_fake_rec.size(1)
-
-			#include the GENloss (the encoder loss) with the VAE loss
 			en_de_coder_loss += opts.delta * gen_loss
 
-			#zero the grads - otherwise they will be acculated
-			#fill in grads and do updates:
-			optimizer_cvae.zero_grad()
-			en_de_coder_loss.backward() #fill in grads
-			optimizer_cvae.step()
 
+			optimizer_cvae.zero_grad()
+			en_de_coder_loss.backward()
+			optimizer_cvae.step()
 			optimizer_aux.zero_grad()
 			aux_loss.backward()
 			optimizer_aux.step()
-
 			optimizer_dis.zero_grad()
 			dis_loss.backward()
 			optimizer_dis.step()
+
 
 			e_loss += en_de_coder_loss.item()
 			e_kl_loss += kl_loss.item()
@@ -346,19 +326,18 @@ if __name__=='__main__':
 
 		normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], exDir, e=e)
 
-		cvae.save_params(exDir=exDir)
+		# cvae.save_params(exDir=exDir)
 
-
-		losses['total'].append(e_loss/Ns)
-		losses['kl'].append(e_kl_loss/Ns)
-		losses['bce'].append(e_rec_loss/Ns)
-		losses['test_bce'].append(normbceLossTest)
-		losses['dis'].append(e_dis_loss/Ns)
-		losses['gen'].append(e_gen_loss/Ns)
-		losses['class'].append(e_class_loss/Ns)
-		losses['test_class'].append(classScoreTest)
-		losses['aux'].append(e_aux_loss/Ns)
-		losses['auxEnc'].append(e_aux_en_loss/Ns)
+		# losses['total'].append(e_loss/Ns)
+		# losses['kl'].append(e_kl_loss/Ns)
+		# losses['bce'].append(e_rec_loss/Ns)
+		# losses['test_bce'].append(normbceLossTest)
+		# losses['dis'].append(e_dis_loss/Ns)
+		# losses['gen'].append(e_gen_loss/Ns)
+		# losses['class'].append(e_class_loss/Ns)
+		# losses['test_class'].append(classScoreTest)
+		# losses['aux'].append(e_aux_loss/Ns)
+		# losses['auxEnc'].append(e_aux_en_loss/Ns)
 
 		# if e > 1:
 		# 	plot_losses(losses, exDir, epochs=e+1)
