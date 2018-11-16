@@ -94,15 +94,18 @@ class Decoder(nn.Module):
         )
         self.decoder2 = nn.Sequential(
             nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2, padding=1 ,output_padding=1),
-		    nn.BatchNorm2d(128)
+		    nn.BatchNorm2d(128),
+            nn.ReLU()
         )
         self.decoder3 = nn.Sequential(
             nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2, padding=1 ,output_padding=1),
-		    nn.BatchNorm2d(64)
+		    nn.BatchNorm2d(64),
+            nn.ReLU()
         )
         self.decoder4 = nn.Sequential(
             nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2, padding=1 ,output_padding=1),
-		    nn.BatchNorm2d(32)
+		    nn.BatchNorm2d(32),
+            nn.ReLU()
         )
         self.decoder5 = nn.Sequential(
             nn.ConvTranspose2d(32, 3, kernel_size=3, stride=2, padding=1 ,output_padding=1),
