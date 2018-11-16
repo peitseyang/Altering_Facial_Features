@@ -9,7 +9,7 @@ import numpy as np
 import os
 from os.path import join
 
-class CVAE1(nn.Module):
+class CVAE(nn.Module):
 
 	def __init__(self, latent_size, device, num_labels=1):
 		super(CVAE1, self).__init__()
