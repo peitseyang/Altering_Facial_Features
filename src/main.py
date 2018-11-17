@@ -194,8 +194,11 @@ if __name__=='__main__':
         i += 1
     os.mkdir('./ex/' + str(i))
     output_path = './ex/' + str(i)
-    print('Outputs will be saved to:',output_path)
-    save_input_args(output_path, opts)  #save training opts
+    print('Outputs will be saved to:', output_path)
+    f = open(join(output_path,'opts.txt'),'w')
+    saveOpts =''.join(''.join(str(opts).split('(')[1:]).split(')')[:-1]).replace(',','\n')
+    f.write(saveOpts)
+    f.close()
 
 
     # losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'test_bce':[], 'class':[], 'test_class':[], 'aux':[], 'auxEnc':[]}
