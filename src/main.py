@@ -1,4 +1,5 @@
 # pylint: disable=E0401, E0302
+# !/usr/bin/env python -W ignore::UserWarning
 
 import argparse
 from time import time
