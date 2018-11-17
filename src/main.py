@@ -73,12 +73,12 @@ def evaluate(cvae, test_data, exDir, e=1, classifier=None):  #e is the epoch
     z = Variable(torch.randn(test_x.size(0), opts.latent_size)).to(cvae.device)
 
     # ySmile = Variable(torch.Tensor(test_y.size()).fill_(1)).type_as(test_y)
-    y_0 = Variable(etorch.ones(test_y.size())).type_as(test_x)
+    y_0 = Variable(torch.ones(test_y.size())).type_as(test_x)
     samples = cvae.decode(y_0, z).cpu()
     save_image(samples.data, join(exDir,'zero_epoch'+str(e)+'.png'))
 
     # yNoSmile = Variable(torch.Tensor(test_y.size()).fill_(0)).type_as(test_y)
-    y_1 = Variable(torch.zeros(tst_y.size())).type_as(test_x)
+    y_1 = Variable(torch.zeros(test_y.size())).type_as(test_x)
     samples = cvae.decode(y_1, z).cpu()
     save_image(samples.data, join(exDir,'one_epoch'+str(e)+'.png'))
 
