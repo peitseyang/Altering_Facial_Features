@@ -142,12 +142,6 @@ def make_new_folder(exDir):
     os.mkdir(join(exDir,'Ex_'+str(i)))
     return join(exDir,'Ex_'+str(i))
 
-def sample_z(batch_size, nz, useCUDA):
-    if useCUDA:
-        return Variable(torch.randn(batch_size, nz).cuda())
-    else:
-        return Variable(torch.randn(batch_size, nz))
-
 if __name__=='__main__':
 
 	print('pytorch version : ' + str(torch.__version__))
@@ -195,7 +189,7 @@ if __name__=='__main__':
 	cvae = CVAE(opts.latent_size, device).to(device)
 	dis = Discriminator().to(device)
 	aux = Aux(opts.latent_size).to(device)
-	classer = CLASSIFIER().to(device) #for eval only! 
+	classer = CLASSIFIER().to(device)
 
 
 	# #load model is applicable
@@ -237,7 +231,7 @@ if __name__=='__main__':
 	# Nb = len(dataloader['train'])  #no batches
 
 
-	s_full_time = time()
+	full_time = time()
 
 	for e in range(opts.epochs):
 		cvae.train()
@@ -252,7 +246,7 @@ if __name__=='__main__':
 		e_aux_loss = 0
 		e_aux_en_loss = 0
 
-		s_epoch_time = time()
+		epoch_time = time()
 
 		for i, data in enumerate(dataloader['train'], 0):
 			x, y = data
@@ -282,7 +276,7 @@ if __name__=='__main__':
 			
 			dis_real = dis(x)
 			dis_fake_rec = dis(rec.detach())
-			randn_z = sample_z(x.size(0), opts.latent_size, True)
+			randn_z = Variable(torch.randn(opts.batch_size, opts.latent_size)).to(device)
 			randn_y = y.type_as(x)
 			dis_fake_randn = dis(cvae.decode(randn_y, randn_z).detach())
 			label_fake = Variable(torch.Tensor(dis_real.size()).zero_()).type_as(dis_real)
@@ -319,7 +313,7 @@ if __name__=='__main__':
 			if i%100==1:
 				i+=1
 				print('[%d, %d] loss: %0.5f, gen: %0.5f, dis: %0.5f, bce: %0.5f, kl: %0.5f, aux: %0.5f, time: %0.3f' % \
-		 			(e, i, e_loss/i, e_dis_loss/i, e_gen_loss/i, e_rec_loss/i, e_kl_loss/i, e_aux_loss/i, time() - s_epoch_time))
+		 			(e, i, e_loss/i, e_dis_loss/i, e_gen_loss/i, e_rec_loss/i, e_kl_loss/i, e_aux_loss/i, time() - epoch_time))
 
 	
 		#generate samples after each 10 epochs
@@ -343,6 +337,8 @@ if __name__=='__main__':
 		# 	plot_losses(losses, exDir, epochs=e+1)
 		# 	plot_norm_losses(losses, exDir, epochs=e+1)
 
-	normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], exDir, e='evalMode')
+	# normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], exDir, e='evalMode')
+
+	print('full time', time() - full_time)
 
 
