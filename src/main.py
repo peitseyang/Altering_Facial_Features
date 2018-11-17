@@ -28,6 +28,28 @@ from matplotlib import pyplot as plt
 
 EPSILON = 1e-6
 
+import itertools
+import threading
+import time
+import sys
+
+done = False
+# here is the animation
+
+
+def animate():
+    for c in itertools.cycle(['⠋', '⠙', '⠹', '⠸', '⠴', '⠦', '⠧', '⠇', '⠏', '\\']):
+        if done:
+            break
+        sys.stdout.write('\r' + c + ' ')
+        sys.stdout.flush()
+        time.sleep(0.1)
+    sys.stdout.write('\rDone!     ')
+
+
+t = threading.Thread(target=animate)
+t.start()
+
 # python3 celeba_info_cVAEGAN.py --alpha 0.2 --batch_size 32 --beta 0 --delta 0.1 --fSize 32 --epochs 45 --rho 0.1
 
 # def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
@@ -82,7 +104,7 @@ def evaluate(cvae, test_data, exDir, e=1, classifier=None):  #e is the epoch
     samples = cvae.decode(y_1, z).cpu()
     save_image(samples.data, join(exDir,'one_epoch'+str(e)+'.png'))
 
-    test_rec, test_mean, test_log_var, test_predict = cvae(x)
+    test_rec, test_mean, test_log_var, test_predict = cvae(test_x)
 
 
     test_bce_loss, test_kl_loss = cvae.loss(test_rec, test_x, test_mean, test_log_var)
@@ -312,3 +334,6 @@ if __name__=='__main__':
 	# normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], output_path, e='evalMode')
 
     print('full time', time() - full_time)
+
+    time.sleep(5)
+    done = True
