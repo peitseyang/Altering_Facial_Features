@@ -73,12 +73,12 @@ def evaluate(cvae, test_data, exDir, e=1, classifier=None):  #e is the epoch
     z = Variable(torch.randn(test_x.size(0), opts.latent_size)).to(cvae.device)
 
     # ySmile = Variable(torch.Tensor(test_y.size()).fill_(1)).type_as(test_y)
-    y_0 = Variable(torch.ones(test_y.size())).type_as(test_y)
+    y_0 = Variable(etorch.ones(test_y.size())).type_as(test_x)
     samples = cvae.decode(y_0, z).cpu()
     save_image(samples.data, join(exDir,'zero_epoch'+str(e)+'.png'))
 
     # yNoSmile = Variable(torch.Tensor(test_y.size()).fill_(0)).type_as(test_y)
-    y_1 = Variable(torch.zeros(test_y.size())).type_as(test_y)
+    y_1 = Variable(torch.zeros(tst_y.size())).type_as(test_x)
     samples = cvae.decode(y_1, z).cpu()
     save_image(samples.data, join(exDir,'one_epoch'+str(e)+'.png'))
 
@@ -100,10 +100,10 @@ def evaluate(cvae, test_data, exDir, e=1, classifier=None):  #e is the epoch
     # if e == 'evalMode' and classer is not None:
     #     classer.eval()
     #     yPred0 = classer(rec0)
-    #     y0 = Variable(torch.LongTensor(yPred0.size()).fill_(0)).type_as(yTest)
+    #     y0 = Variable(torch.LongTensor(yPred0.size()).fill_(0)).type_as(test_x)
     #     class0 = binary_class_score(yPred0, y0, thresh=0.5)
     #     yPred1 = classer(rec1)
-    #     y1 = Variable(torch.LongTensor(yPred1.size()).fill_(1)).type_as(yTest)
+    #     y1 = Variable(torch.LongTensor(yPred1.size()).fill_(1)).type_as(test_x)
     #     class1 = binary_class_score(yPred1, y1, thresh=0.5)
 
     #     f = open(join(exDir, 'eval.txt'), 'w')
