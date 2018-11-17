@@ -30,8 +30,8 @@ EPSILON = 1e-6
 
 import itertools
 import threading
-import time
 import sys
+from time import sleep
 
 done = False
 # here is the animation
@@ -43,7 +43,7 @@ def animate():
             break
         sys.stdout.write('\r' + c + ' ')
         sys.stdout.flush()
-        time.sleep(0.1)
+        sleep(0.1)
     sys.stdout.write('\rDone!     ')
 
 
@@ -335,5 +335,5 @@ if __name__=='__main__':
 
     print('full time', time() - full_time)
 
-    time.sleep(5)
+    sleep(5)
     done = True
