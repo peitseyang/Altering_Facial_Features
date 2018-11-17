@@ -67,7 +67,7 @@ def evaluate(cvae, test_data, exDir, e=1, classifier=None):  #e is the epoch
     cvae.eval()
 
     test_x, test_y = iter(test_data).next()
-    test_x, test_y = Variable(test_x).to(cvae.device)
+    test_x = Variable(test_x).to(cvae.device)
     test_y = Variable(test_y).view(test_y.size(0),1).to(cvae.device)
 
     z = Variable(torch.randn(test_x.size(0), opts.latent_size)).to(cvae.device)
