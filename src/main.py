@@ -38,7 +38,7 @@ done = False
 
 
 def animate():
-    for c in itertools.cycle(['⠋', '⠙', '⠹', '⠸', '⠴', '⠦', '⠧', '⠇', '⠏', '\\']):
+    for c in itertools.cycle(['⠋', '⠙', '⠹', '⠸', '⠴', '⠦', '⠧', '⠇', '⠏']):
         if done:
             break
         sys.stdout.write('\r' + c + ' ')
