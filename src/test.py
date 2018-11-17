@@ -258,6 +258,7 @@ if __name__=='__main__':
 			x, y = data
 			x = Variable(x).to(device)
 			y = Variable(y).view(y.size(0),1).to(device)
+			print(y.type())
 
 
 			rec, mean, log_var, predict = cvae(x)
