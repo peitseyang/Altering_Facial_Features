@@ -33,7 +33,6 @@ EPSILON = 1e-6
 # def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
 #     print('switching label...1')
 #     #get x's that have smile
-#     print(type(x))
 #     if (y.data == 0).all(): #if no samples with label 1 use all samples
 #         x0 = Variable(x)
 #     else:
@@ -45,8 +44,6 @@ EPSILON = 1e-6
 #     z = cvae.reparameterization(mu, logVar)
 
 #     ySmile = Variable(torch.LongTensor(np.ones(y.size(), dtype=int))).type_as(z)
-#     print(np.shape(z))
-#     print(np.shape(ySmile))
 #     smileSamples = cvae.decode(ySmile, z)    
     
 
