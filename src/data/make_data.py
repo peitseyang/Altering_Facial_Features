@@ -32,6 +32,9 @@ t.start()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--root', default='/Users/alexyang/Desktop/final_project/Altering_Facial_Features/src/data/raw_data/', type=str)
+parser.add_argument('--eval_root', default='/Users/alexyang/Desktop/final_project/Altering_Facial_Features/src/data/test_data/test.jpg', type=str)
+parser.add_argument('--evaluate', dest='eval_mode', action='store_true')
+parser.set_defaults(eval_mode=False)
 parser.add_argument('--test', dest='test_mode', action='store_true')
 parser.add_argument('--make', dest='test_mode', action='store_false')
 parser.set_defaults(test_mode=False)
@@ -90,7 +93,7 @@ def make_data():
 
 	f = open(attr_path)
 	f.readline()
-	# labels_name = f.readline().split(' ')
+	labels_name = f.readline().split(' ')
 	data_img = []
 	data_label = []
 	attr_index = attributes.index(opts.attr)
@@ -98,11 +101,13 @@ def make_data():
 	count_false = 0
 
 	for index, line in enumerate(f):
+		print(line)
 		line_array = line.split(' ')
 		img_name = line_array[0]
 		labels = line_array[1:]
 
 		img = imread(img_path + img_name)
+		print(np.shape(img))
 		img = Image.fromarray(img)
 		img = fit(img, size=(64, 64)) # (64, 64, 3)
 		label = loadtxt(labels).astype('int')
@@ -149,9 +154,28 @@ def make_data():
 		
 		plt.show()
 
-make_data()
-done = True
+def make_test_data():
+	print('changing data...')
+	img = imread(opts.eval_root)
+	img = Image.fromarray(img)
+	img = fit(img, size=(64, 64))
+	img = transpose(img, (2, 0, 1))
+	
+	np.save('./test_data/test.npy', np.asarray(img))
 
+	# plt.figure()
+	# plt.imshow(img.transpose(1,2,0))
+	# plt.show()
+
+try:
+	if opts.eval_mode:
+		make_test_data()
+	else:
+		make_data()
+	done = True
+except Exception as e:
+	print(e)
+	done = True
 
 
 

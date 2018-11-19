@@ -42,13 +42,13 @@ class CVAE(nn.Module):
 
 		return bce / (64 * 64), kl / self.latent_size
 
-	def save_params(self, exDir):
+	def save_params(self, path):
 		print('saving params...')
-		torch.save(self.state_dict(), join(exDir, 'cvae1_params'))
+		torch.save(self.state_dict(), join(path, 'cvae1_params'))
 
-	def load_params(self, exDir):
+	def load_params(self, path):
 		print('loading params...')
-		self.load_state_dict(torch.load(join(exDir, 'cvae1_params')))
+		self.load_state_dict(torch.load(join(path, 'cvae1_params'), map_location='cpu'))
 
 class Encoder(nn.Module):
 	def __init__(self, latent_size, num_labels):

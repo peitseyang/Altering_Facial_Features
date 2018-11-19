@@ -90,6 +90,20 @@ class CelebA(data.Dataset):
         label = label.astype(int)
         return img, label
 
+class TestData(data.Dataset):
+    def __init__(self, label, path, transform=None):
+        self.test_path = path
+        self.transform = transform
+        print(np.shape(np.load(self.test_path)))
+        self.test_data = np.load(self.test_path).transpose((1, 2, 0))
+        self.test_label = label
+
+    def __getitem__(self, index):
+        img = Image.fromarray(self.test_data[index])
+        if self.transform is not None:
+            img = self.transform(img)
+        return img, self.test_label
+
 
 def UnitTest(label):
     print('Unit testing class CelebA with ' + label + ' attribute')

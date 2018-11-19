@@ -309,7 +309,7 @@ if __name__=='__main__':
 
         normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], output_path, e=e)
 
-		# cvae.save_params(exDir=exDir)
+        cvae.save_params(path=output_path)
 
 		# losses['total'].append(e_loss/Ns)
 		# losses['kl'].append(e_kl_loss/Ns)
