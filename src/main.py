@@ -34,8 +34,6 @@ import sys
 from time import sleep
 
 done = False
-# here is the animation
-
 
 def animate():
     for c in itertools.cycle(['⠋', '⠙', '⠹', '⠸', '⠴', '⠦', '⠧', '⠇', '⠏']):
@@ -160,9 +158,6 @@ if __name__=='__main__':
     parser.add_argument('--gamma', default=1, type=float, help='p4') #weight on the aux enc loss
     parser.add_argument('--delta', default=1, type=float, help='p5') #weight on the adversarial loss
 
-    parser.add_argument('--load_VAE_from', default=None, type=str)
-    parser.add_argument('--load_CLASSER_from', default='../../Experiments_delta_z/celeba_joint_VAE_DZ/Ex_15', type=str)
-    parser.add_argument('--evalMode', action='store_true')
 
 
     opts = parser.parse_args()
