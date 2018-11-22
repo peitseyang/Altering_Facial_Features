@@ -15,3 +15,5 @@ src/data/0.png
 src/model/__pycache__
 
 src/test/cvae1_params
+
+src/test/evalFolder

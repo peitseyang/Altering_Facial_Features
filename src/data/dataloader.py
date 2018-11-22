@@ -94,15 +94,21 @@ class TestData(data.Dataset):
     def __init__(self, label, path, transform=None):
         self.test_path = path
         self.transform = transform
-        print(np.shape(np.load(self.test_path)))
-        self.test_data = np.load(self.test_path).transpose((1, 2, 0))
-        self.test_label = label
+        self.test_data = np.load(self.test_path)
+        self.test_data = self.test_data.transpose((0, 2, 3, 1))
+        self.test_label = [label]
+
+    def __len__(self):
+        return len(self.test_data)
 
     def __getitem__(self, index):
-        img = Image.fromarray(self.test_data[index])
+        img, label = Image.fromarray(self.test_data[index]), self.test_label[index]
         if self.transform is not None:
             img = self.transform(img)
-        return img, self.test_label
+        # print(np.shape(img))
+        # print(np.shape(label))
+        # print(label)
+        return img, label
 
 
 def UnitTest(label):

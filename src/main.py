@@ -246,7 +246,7 @@ if __name__=='__main__':
             y = Variable(y).view(y.size(0),1).to(device)
 
 
-            rec, mean, log_var, predict = cvae(x)
+            rec, mean, log_var, predict = cvae(x, y)
             z = cvae.reparameterization(mean, log_var)
             rec_loss, kl_loss = cvae.loss(rec, x, mean, log_var)
             en_de_coder_loss = rec_loss + opts.alpha * kl_loss
@@ -262,9 +262,8 @@ if __name__=='__main__':
             auxY = aux(z)
             aux_en_loss = loss(auxY.type_as(x), y.type_as(x))  
             en_de_coder_loss -= opts.gamma * aux_en_loss
-
-            auxY = aux(z.detach())  #detach: to ONLY update the AUX net #the prediction here for GT being predY
-            aux_loss = loss(auxY.type_as(x), y.type_as(x)) #correct order  #predY is a Nx2 use 2nd col.
+            auxY = aux(z.detach())
+            aux_loss = loss(auxY.type_as(x), y.type_as(x))
 
             dis_real = dis(x)
             dis_fake_rec = dis(rec.detach())

@@ -156,12 +156,13 @@ def make_data():
 
 def make_test_data():
 	print('changing data...')
+	data_img = []
 	img = imread(opts.eval_root)
 	img = Image.fromarray(img)
 	img = fit(img, size=(64, 64))
 	img = transpose(img, (2, 0, 1))
-	
-	np.save('./test_data/test.npy', np.asarray(img))
+	data_img.append(img)
+	np.save('./test_data/test.npy', np.asarray(data_img))
 
 	# plt.figure()
 	# plt.imshow(img.transpose(1,2,0))

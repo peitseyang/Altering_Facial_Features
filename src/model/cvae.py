@@ -21,7 +21,7 @@ class CVAE(nn.Module):
 		self.encode = Encoder(latent_size, num_labels)
 		self.decode = Decoder(latent_size, num_labels)
 
-	def forward(self, x):
+	def forward(self, x, hat_y):
 		mean, log_var, y = self.encode(x)
 		z = self.reparameterization(mean, log_var)
 		rec = self.decode(y, z)
