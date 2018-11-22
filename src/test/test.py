@@ -32,38 +32,33 @@ EPSILON = 1e-6
 
 # python3 celeba_info_cVAEGAN.py --alpha 0.2 --batch_size 32 --beta 0 --delta 0.1 --fSize 32 --epochs 45 --rho 0.1
 
-# def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
-#     print('switching label...1')
-#     #get x's that have smile
-#     if (y.data == 0).all(): #if no samples with label 1 use all samples
-#         x0 = Variable(x)
-#     else:
-#         zeroIdx = torch.nonzero(y.data)
-#         x0 = Variable(torch.index_select(x, dim=0, index=zeroIdx[:,0])).type_as(x)
+def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
+    print('switching label...1')
+    #get x's that have smile
+    if (y.data == 0).all(): #if no samples with label 1 use all samples
+        x0 = Variable(x)
+    else:
+        zeroIdx = torch.nonzero(y.data)
+        x0 = Variable(torch.index_select(x, dim=0, index=zeroIdx[:,0])).type_as(x)
 
-#     #get z
-#     mu, logVar, y = cvae.encode(x0)
-#     z = cvae.reparameterization(mu, logVar)
+    #get z
+    mu, logVar, y = cvae.encode(x0)
+    z = cvae.reparameterization(mu, logVar)
 
-#     ySmile = Variable(torch.LongTensor(np.ones(y.size(), dtype=int))).type_as(z)
-#     smileSamples = cvae.decode(ySmile, z)    
+    ySmile = Variable(torch.LongTensor(np.ones(y.size(), dtype=int))).type_as(z)
+    smileSamples = cvae.decode(ySmile, z)    
     
 
-#     yNoSmile = Variable(torch.LongTensor(np.zeros(y.size(), dtype=int))).type_as(z)
-#     noSmileSamples = cvae.decode(yNoSmile, z)
+    yNoSmile = Variable(torch.LongTensor(np.zeros(y.size(), dtype=int))).type_as(z)
+    noSmileSamples = cvae.decode(yNoSmile, z)
     
-#     if exDir is not None:
-#         print('saving rec w/ and w/out label switch to', join(exDir,'rec.png'),'... ')
-#         save_image(x0.data, join(exDir, 'original.png'))
-#         save_image(smileSamples.cpu().data, join(exDir,'rec_1.png'))
-#         save_image(noSmileSamples.cpu().data, join(exDir,'rec_0.png'))
+    if exDir is not None:
+        print('saving rec w/ and w/out label switch to', join(exDir,'rec.png'),'... ')
+        save_image(x0.data, join(exDir, 'original.png'))
+        save_image(smileSamples.cpu().data, join(exDir,'rec_1.png'))
+        save_image(noSmileSamples.cpu().data, join(exDir,'rec_0.png'))
 
-#     return smileSamples, noSmileSamples
-
-# def binary_class_score(pred, target, thresh=0.5):
-#     predLabel = torch.gt(pred, thresh)
-#     classScoreTest = torch.eq(predLabel, target.type_as(predLabel))
-#     return  classScoreTest.float().sum()/target.size(0)
+    return smileSamples, noSmileSamples
 
 
 print('pytorch version : ' + str(torch.__version__))
@@ -100,26 +95,15 @@ except:
 
 cvae.eval()
 
-x, y = dataloader
-print(x)
-print(y)
+x, y = iter(dataloader).next()
+test_x = Variable(x)
+test_y = Variable(y)
+print(np.shape(test_x))
+print(np.shape(test_y))
 
-# test_x, test_y = iter(test_data).next()
-# test_x = Variable(test_x).to(cvae.device)
-# test_y = Variable(test_y).view(test_y.size(0),1).to(cvae.device)
+# z = Variable(torch.randn(test_x.size(0), 200))
 
-# z = Variable(torch.randn(test_x.size(0), opts.latent_size)).to(cvae.device)
-
-# y_1 = Variable(torch.ones(test_y.size())).type_as(test_x)
-# samples = cvae.decode(y_1, z).cpu()
-# save_image(samples.data, join(exDir,'one_epoch'+str(e)+'.png'))
-
-# y_0 = Variable(torch.zeros(test_y.size())).type_as(test_x)
-# samples = cvae.decode(y_0, z).cpu()
-# save_image(samples.data, join(exDir,'zero_epoch'+str(e)+'.png'))
-
-# test_rec, test_mean, test_log_var, test_predict = cvae(test_x)
-
+test_rec, test_mean, test_log_var, test_predict = cvae(test_x)
 
 # test_bce_loss, test_kl_loss = cvae.loss(test_rec, test_x, test_mean, test_log_var)
 # predict_label = torch.floor(test_predict)
@@ -127,10 +111,10 @@ print(y)
 # classScoreTest= binary_class_score(predict_label, test_y, thresh=0.5)
 # print('classification test:', classScoreTest.data[0])
 
-# save_image(test_x.data, join(exDir,'input.png'))
-# save_image(test_rec.data, join(exDir,'output_'+str(e)+'.png'))
+save_image(test_x.data, join(evaluation_dir,'input.png'))
+save_image(test_rec.data, join(evaluation_dir,'output_test.png'))
 
-# rec1, rec0 = label_switch(test_x.data, test_y, cvae, exDir=exDir)
+rec1, rec0 = label_switch(test_x.data, test_y, cvae, exDir=evaluation_dir)
 
 # for further eval
 # if e == 'evalMode' and classer is not None:
