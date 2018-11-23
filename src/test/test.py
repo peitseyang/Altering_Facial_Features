@@ -103,7 +103,7 @@ print(np.shape(test_y))
 
 # z = Variable(torch.randn(test_x.size(0), 200))
 
-test_rec, test_mean, test_log_var, test_predict = cvae(test_x)
+test_rec, test_mean, test_log_var, test_predict = cvae(test_x, test_y)
 
 # test_bce_loss, test_kl_loss = cvae.loss(test_rec, test_x, test_mean, test_log_var)
 # predict_label = torch.floor(test_predict)
