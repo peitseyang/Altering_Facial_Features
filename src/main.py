@@ -233,9 +233,9 @@ if __name__=='__main__':
             class_loss = loss(predict.type_as(x), y.type_as(x))
             en_de_coder_loss += opts.rho * class_loss
 
-            rec_mean, rec_log_var, rec_predict = cvae.encode(rec)
-            rec_class_loss = loss(rec_predict.type_as(x), y.type_as(x))
-            en_de_coder_loss += opts.beta * rec_class_loss
+            # rec_mean, rec_log_var, rec_predict = cvae.encode(rec)
+            # rec_class_loss = loss(rec_predict.type_as(x), y.type_as(x))
+            # en_de_coder_loss += opts.beta * rec_class_loss
 
             classifierY = classifier(z)
             classifier_en_loss = loss(classifierY.type_as(x), y.type_as(x))  
