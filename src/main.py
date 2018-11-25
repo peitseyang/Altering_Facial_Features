@@ -49,6 +49,7 @@ t = threading.Thread(target=animate)
 t.start()
 
 # python3 celeba_info_cVAEGAN.py --alpha 0.2 --batch_size 32 --beta 0 --delta 0.1 --fSize 32 --epochs 45 --rho 0.1
+# python3 main.py --epochs 45 --alpha 0.2 --delta 0.1 --rho 0.1
 
 def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
     print('switching label...1')
@@ -100,7 +101,7 @@ def evaluate(cvae, test_data, exDir, e=1):  #e is the epoch
     samples = cvae.decode(y_1, z).cpu()
     save_image(samples.data, join(exDir,'one_epoch'+str(e)+'.png'))
 
-    test_rec, test_mean, test_log_var, test_predict = cvae(test_x)
+    test_rec, test_mean, test_log_var, test_predict = cvae(test_x, test_y)
 
 
     test_bce_loss, test_kl_loss = cvae.loss(test_rec, test_x, test_mean, test_log_var)
