@@ -44,11 +44,11 @@ class CVAE(nn.Module):
 
 	def save_params(self, path):
 		print('saving params...')
-		torch.save(self.state_dict(), join(path, 'cvae1_params'))
+		torch.save(self.state_dict(), join(path, 'cvae_params'))
 
 	def load_params(self, path):
 		print('loading params...')
-		self.load_state_dict(torch.load(join(path, 'cvae1_params'), map_location='cpu'))
+		self.load_state_dict(torch.load(join(path, 'cvae_params'), map_location='cpu'))
 
 class Encoder(nn.Module):
 	def __init__(self, latent_size, num_labels):
