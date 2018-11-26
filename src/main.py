@@ -180,9 +180,10 @@ if __name__=='__main__':
     print(classifier)
 
 
-    optimizer_cvae = torch.optim.RMSprop(cvae.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)
-    optimizer_dis = torch.optim.RMSprop(dis.parameters(), lr=opts.lr, alpha=opts.momentum, weight_decay=opts.weight_decay)
-    optimizer_classifier = torch.optim.RMSprop(classifier.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)
+    optimizer_cvae = torch.optim.Adam(cvae.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)
+    # optimizer_dis = torch.optim.RMSprop(dis.parameters(), lr=opts.lr, alpha=opts.momentum, weight_decay=opts.weight_decay)
+    optimizer_dis = torch.optim.Adam(dis.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)
+    optimizer_classifier = torch.optim.Adam(classifier.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)
 
 
     i = 1
