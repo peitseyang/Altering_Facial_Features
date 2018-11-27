@@ -51,6 +51,48 @@ t.start()
 # python3 celeba_info_cVAEGAN.py --alpha 0.2 --batch_size 32 --beta 0 --delta 0.1 --fSize 32 --epochs 45 --rho 0.1
 # python3 main.py --epochs 45 --alpha 0.2 --delta 0.1 --rho 0.1
 
+def plot_losses(losses, exDir, epochs=1, title='loss'):
+    #losses should be a dictionary of losses 
+    # e.g. losses = {'loss1':[], 'loss2:'[], 'loss3':[], ... etc.}
+    fig1 = plt.figure()
+    assert epochs > 0
+    for key in losses:
+        noPoints = len(losses[key])
+        factor = float(noPoints)/epochs
+        plt.plot(np.arange(len(losses[key]))/factor,losses[key], label=key)
+
+    plt.xlabel('epoch')
+    plt.ylabel('loss')
+    plt.legend()
+    plt.title(title)
+    fig1.savefig(join(exDir, title+'_plt.png'))
+
+def plot_norm_losses(losses, exDir, epochs=1, title='loss'):
+    #losses should be a dictionary of losses 
+    # e.g. losses = {'loss1':[], 'loss2:'[], 'loss3':[], ... etc.}
+    assert epochs > 0
+    fig1 = plt.figure()
+    for key in losses:
+        y = losses[key]
+        y -= np.mean(y)
+        y /= ( np.std(y) + 1e-6 ) 
+        noPoints = len(losses[key])
+        factor = float(noPoints)/epochs
+        plt.plot(np.arange(len(losses[key]))/factor,y, label=key)
+    plt.xlabel('epoch')
+    plt.ylabel('normalised loss')
+    plt.legend()
+    fig1.savefig(join(exDir, 'norm_'+title+'_plt.png'))
+
+def save_input_args(exDir, opts):
+    #save the input args to 
+    f = open(join(exDir,'opts.txt'),'w')
+    saveOpts =''.join(''.join(str(opts).split('(')[1:])\
+        .split(')')[:-1])\
+        .replace(',','\n')
+    f.write(saveOpts)
+    f.close()
+
 def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
     print('switching label...1')
     #get x's that have smile
@@ -148,15 +190,15 @@ if __name__=='__main__':
     parser.add_argument('--epochs', default=10, type=int)
 
     parser.add_argument('--lr', default=0.0002, type=float)
-    parser.add_argument('--momentum', default=0.5, type=float)
     parser.add_argument('--weight_decay', default=0.01, type=float)
+    parser.add_argument('--b1', default=0.5, type=float)
+    parser.add_argument('--b2', default=0.999, type=float)
 
     parser.add_argument('--alpha', default=1, type=float, help='p1') #weight on the KL divergance
     parser.add_argument('--rho', default=1, type=float, help='p2') #weight on the class loss for the vae
-    parser.add_argument('--beta', default=1, type=float, help='p3')  #weight on the rec class loss to update VAE
+    # parser.add_argument('--beta', default=1, type=float, help='p3')  #weight on the rec class loss to update VAE
     parser.add_argument('--gamma', default=1, type=float, help='p4') #weight on the classifier enc loss
     parser.add_argument('--delta', default=1, type=float, help='p5') #weight on the adversarial loss
-
 
 
     opts = parser.parse_args()
@@ -180,10 +222,10 @@ if __name__=='__main__':
     print(classifier)
 
 
-    optimizer_cvae = torch.optim.Adam(cvae.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)
+    optimizer_cvae = torch.optim.Adam(cvae.parameters(), lr=opts.lr,  betas=(opts.b1, opts.b2), weight_decay=opts.weight_decay)
     # optimizer_dis = torch.optim.RMSprop(dis.parameters(), lr=opts.lr, alpha=opts.momentum, weight_decay=opts.weight_decay)
-    optimizer_dis = torch.optim.Adam(dis.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)
-    optimizer_classifier = torch.optim.Adam(classifier.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)
+    optimizer_dis = torch.optim.Adam(dis.parameters(), lr=opts.lr,  betas=(opts.b1, opts.b2), weight_decay=opts.weight_decay)
+    optimizer_classifier = torch.optim.Adam(classifier.parameters(), lr=opts.lr,  betas=(opts.b1, opts.b2), weight_decay=opts.weight_decay)
 
 
     i = 1
@@ -197,10 +239,10 @@ if __name__=='__main__':
     f.write(saveOpts)
     f.close()
 
-
-    # losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'test_bce':[], 'class':[], 'test_class':[], 'classifier':[], 'classifierEnc':[]}
-    # Ns = len(dataloader['train'])*opts.batch_size  #no samples
-    # Nb = len(dataloader['train'])  #no batches
+    # 'test_class':[], 'test_bce':[], 
+    losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'class':[], 'classifier':[], 'classifierEnc':[]}
+    Ns = len(dataloader['train'])*opts.batch_size  #no samples
+    Nb = len(dataloader['train'])  #no batches
 
 
     full_time = time()
@@ -248,15 +290,14 @@ if __name__=='__main__':
             dis_real = dis(x)
             dis_fake_rec = dis(rec.detach())
             randn_z = Variable(torch.randn(y.size(0), opts.latent_size)).to(device)
-            randn_y = y.type_as(x)
-            dis_fake_randn = dis(cvae.decode(randn_y, randn_z).detach())
+            dis_fake_randn = dis(cvae.decode(y.type_as(x), randn_z).detach())
             label_fake = Variable(torch.Tensor(dis_real.size()).zero_()).type_as(dis_real)
             label_real = Variable(torch.Tensor(dis_real.size()).fill_(1)).type_as(dis_real)
             loss = nn.BCELoss(size_average=False)
             dis_loss = 0.3 * (loss(dis_real, label_real) + loss(dis_fake_rec, label_fake) + loss(dis_fake_randn, label_fake)) / dis_real.size(1)
 
             dis_fake_rec = dis(rec)
-            dis_fake_randn = dis(cvae.decode(randn_y, randn_z))
+            dis_fake_randn = dis(cvae.decode(y.type_as(x), randn_z))
             gen_loss = 0.5 * (loss(dis_fake_rec, label_real) + loss(dis_fake_randn, label_real)) / dis_fake_rec.size(1)
             en_de_coder_loss += opts.delta * gen_loss
 
@@ -283,27 +324,27 @@ if __name__=='__main__':
 
             if i%100==1:
                 i+=1
-                print('[%d, %d] loss: %0.5f, gen: %0.5f, dis: %0.5f, bce: %0.5f, kl: %0.5f, classifier: %0.5f, time: %0.3f' % (e, i, e_loss/i, e_dis_loss/i, e_gen_loss/i, e_rec_loss/i, e_kl_loss/i, e_classifier_loss/i, time() - epoch_time))
+                print('[%d, %d] loss: %0.5f, bce: %0.5f, kl: %0.5f, gen: %0.5f, dis: %0.5f, classifier: %0.5f, time: %0.3f' % (e, i, e_loss/i, e_rec_loss/i, e_kl_loss/i, e_gen_loss/i, e_dis_loss/i,  e_classifier_loss/i, time() - epoch_time))
 
 
         normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], output_path, e=e)
 
         cvae.save_params(path=output_path)
 
-        # losses['total'].append(e_loss/Ns)
-        # losses['kl'].append(e_kl_loss/Ns)
-        # losses['bce'].append(e_rec_loss/Ns)
+        losses['total'].append(e_loss/Ns)
+        losses['kl'].append(e_kl_loss/Ns)
+        losses['bce'].append(e_rec_loss/Ns)
         # losses['test_bce'].append(normbceLossTest)
-        # losses['dis'].append(e_dis_loss/Ns)
-        # losses['gen'].append(e_gen_loss/Ns)
-        # losses['class'].append(e_class_loss/Ns)
+        losses['dis'].append(e_dis_loss/Ns)
+        losses['gen'].append(e_gen_loss/Ns)
+        losses['class'].append(e_class_loss/Ns)
         # losses['test_class'].append(classScoreTest)
-        # losses['classifier'].append(e_classifier_loss/Ns)
-        # losses['classifierEnc'].append(e_classifier_en_loss/Ns)
+        losses['classifier'].append(e_classifier_loss/Ns)
+        losses['classifierEnc'].append(e_classifier_en_loss/Ns)
 
-        # if e > 1:
-        #     plot_losses(losses, exDir, epochs=e+1)
-        #     plot_norm_losses(losses, exDir, epochs=e+1)
+        if e > 1:
+            plot_losses(losses, output_path, epochs=e+1)
+            plot_norm_losses(losses, output_path, epochs=e+1)
 
 	# normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], output_path, e='evalMode')
 
