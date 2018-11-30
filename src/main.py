@@ -240,7 +240,7 @@ if __name__=='__main__':
     f.close()
 
     # 'test_class':[], 'test_bce':[], 
-    losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'class':[], 'classifier':[], 'classifierEnc':[]}
+    losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'class':[], 'classifier':[]}
     Ns = len(dataloader['train'])*opts.batch_size  #no samples
     Nb = len(dataloader['train'])  #no batches
 
@@ -340,7 +340,7 @@ if __name__=='__main__':
         losses['class'].append(e_class_loss/Ns)
         # losses['test_class'].append(classScoreTest)
         losses['classifier'].append(e_classifier_loss/Ns)
-        losses['classifierEnc'].append(e_classifier_en_loss/Ns)
+        # losses['classifierEnc'].append(e_classifier_en_loss/Ns)
 
         if e > 1:
             plot_losses(losses, output_path, epochs=e+1)
