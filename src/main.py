@@ -307,7 +307,7 @@ if __name__=='__main__':
         fig1 = plt.figure()
         for key in losses:
             noPoints = len(losses[key])
-            factor = float(noPoints)/e
+            factor = float(noPoints)/(e+1)
             plt.plot(np.arange(len(losses[key]))/factor,losses[key], label=key)
 
         plt.xlabel('epoch')
@@ -322,7 +322,7 @@ if __name__=='__main__':
             y -= np.mean(y)
             y /= ( np.std(y) + 1e-6 ) 
             noPoints = len(losses[key])
-            factor = float(noPoints)/e
+            factor = float(noPoints)/(e+1)
             plt.plot(np.arange(len(losses[key]))/factor,y, label=key)
         plt.xlabel('epoch')
         plt.ylabel('normalised loss')
