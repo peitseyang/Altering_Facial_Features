@@ -7,8 +7,7 @@ from time import time
 import numpy as np
 
 from data.dataloader import TestData
-from model.cvae import CVAE
-from model.discriminator import Discriminator as CLASSIFIER
+from model.cvae import CVAETEST as CVAE
 
 from torchvision import transforms
 import torch.nn.functional as F
@@ -20,45 +19,26 @@ from torchvision.utils import save_image
 
 import os
 from os.path import join
-from PIL import Image
 
-import matplotlib 
-matplotlib.use('Agg')
-from matplotlib import pyplot as plt
+from tkinter import *
+from tkinter import filedialog
+from PIL import Image, ImageTk
 
 import sys
 
-EPSILON = 1e-6
+import argparse
+import numpy as np
+from skimage.io import imread
+from PIL import Image
+from PIL.ImageOps import fit
+from numpy import loadtxt
+from numpy import transpose
+from matplotlib import pyplot as plt
+import random
+from time import sleep
+
 
 # python3 celeba_info_cVAEGAN.py --alpha 0.2 --batch_size 32 --beta 0 --delta 0.1 --fSize 32 --epochs 45 --rho 0.1
-
-def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
-    print('switching label...1')
-    #get x's that have smile
-    if (y.data == 0).all(): #if no samples with label 1 use all samples
-        x0 = Variable(x)
-    else:
-        zeroIdx = torch.nonzero(y.data)
-        x0 = Variable(torch.index_select(x, dim=0, index=zeroIdx[:,0])).type_as(x)
-
-    #get z
-    mu, logVar, y = cvae.encode(x0)
-    z = cvae.reparameterization(mu, logVar)
-
-    ySmile = Variable(torch.LongTensor(np.ones(y.size(), dtype=int))).type_as(z)
-    smileSamples = cvae.decode(ySmile, z)    
-    
-
-    yNoSmile = Variable(torch.LongTensor(np.zeros(y.size(), dtype=int))).type_as(z)
-    noSmileSamples = cvae.decode(yNoSmile, z)
-    
-    if exDir is not None:
-        print('saving rec w/ and w/out label switch to', join(exDir,'rec.png'),'... ')
-        save_image(x0.data, join(exDir, 'original.png'))
-        save_image(smileSamples.cpu().data, join(exDir,'rec_1.png'))
-        save_image(noSmileSamples.cpu().data, join(exDir,'rec_0.png'))
-
-    return smileSamples, noSmileSamples
 
 
 print('pytorch version : ' + str(torch.__version__))
@@ -66,71 +46,101 @@ print('pytorch version : ' + str(torch.__version__))
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--label', default=None, type=int)
+parser.add_argument('--label', default=0, type=int)
 parser.add_argument('--path', default='/Users/alexyang/Desktop/final_project/Altering_Facial_Features/src/data/test_data/test.npy', type=str)
-parser.add_argument('--load_VAE_from', default='/Users/alexyang/Desktop/final_project/Altering_Facial_Features/src/test/', type=str)
-parser.add_argument('--load_CLASSER_from', default='../../Experiments_delta_z/celeba_joint_VAE_DZ/Ex_15', type=str)
-parser.add_argument('--evalMode', action='store_true')
-
+parser.add_argument('--CVAE_PATH', default='/Users/alexyang/Desktop/final_project/Altering_Facial_Features/src/test/', type=str)
 opts = parser.parse_args()
 
+root = Tk()
+root.title('張元英我愛你')
+root.resizable(False, False)
+windowWidth = 800
+windowHeight = 500
+screenWidth,screenHeight = root.maxsize()
+geometryParam = '%dx%d+%d+%d'%(windowWidth, windowHeight, (screenWidth-windowWidth)/2, (screenHeight - windowHeight)/2)
+root.geometry(geometryParam)
+root.wm_attributes('-topmost',1)
 
-test_dataset = TestData(label=opts.label, path=opts.path, transform=transforms.ToTensor())
-dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=1)
+frame = Frame(root, bd=2, relief=SUNKEN)
+frame.grid_rowconfigure(0, weight=1)
+frame.grid_columnconfigure(0, weight=1)
+xscroll = Scrollbar(frame, orient=HORIZONTAL)
+xscroll.grid(row=1, column=0, sticky=E+W)
+yscroll = Scrollbar(frame)
+yscroll.grid(row=0, column=1, sticky=N+S)
+canvas = Canvas(frame, bd=0, xscrollcommand=xscroll.set, yscrollcommand=yscroll.set)
+canvas.grid(row=0, column=0, sticky=N+S+E+W)
+xscroll.config(command=canvas.xview)
+yscroll.config(command=canvas.yview)
+frame.pack(fill=BOTH,expand=1)
 
-cvae = CVAE(200, device).to(device)
-# classer = CLASSIFIER().to(device)
+def printcoords():
+    File = filedialog.askopenfilename(parent=root,title='Choose an image.')
 
-cvae.load_params(opts.load_VAE_from)
-# classer.load_params(opts.load_CLASSER_from)
+    print('changing data...')
+    data_img = []
+    img = imread(File)
+    img = Image.fromarray(img)
+    img = fit(img, size=(64, 64))
+    img = transpose(img, (2, 0, 1))
+    data_img.append(img)
+    np.save(opts.path, np.asarray(data_img))
 
-evaluation_dir= opts.load_VAE_from + 'evalFolder'
-try:  #may already have an eval folder
-	os.mkdir(evaluation_dir)
-except:
-	print('file already created')
-# _, _ = evaluate(cvae, dataloader, evaluation_dir, e='evalMode', classifier=classer)
-# normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], exDir, e=e)
-# normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], exDir, e='evalMode')
+    test_dataset = TestData(label=opts.label, path=opts.path, transform=transforms.ToTensor())
+    dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=1)
 
-cvae.eval()
+    cvae = CVAE(200).to(device)
+    cvae.load_params(opts.CVAE_PATH)
 
-x, y = iter(dataloader).next()
-test_x = Variable(x)
-test_y = Variable(y)
-print(np.shape(test_x))
-print(np.shape(test_y))
+    evaluation_dir= opts.CVAE_PATH + 'evalFolder'
+    try:
+        os.mkdir(evaluation_dir)
+    except:
+        print('file already created')
 
-# z = Variable(torch.randn(test_x.size(0), 200))
+    cvae.eval()
 
-test_rec, test_mean, test_log_var, test_predict = cvae(test_x, test_y)
+    test_x, test_y = iter(dataloader).next()
 
-# test_bce_loss, test_kl_loss = cvae.loss(test_rec, test_x, test_mean, test_log_var)
-# predict_label = torch.floor(test_predict)
+    for i in range(3):
+        test_rec, test_mean, test_log_var, test_predict = cvae(test_x, test_y)
 
-# classScoreTest= binary_class_score(predict_label, test_y, thresh=0.5)
-# print('classification test:', classScoreTest.data[0])
+        save_image(test_x.data, join(evaluation_dir,'input.png'))
+        save_image(test_rec.data, join(evaluation_dir,'output_test.png'))
+        x = test_x.data
+        y = test_y
 
-save_image(test_x.data, join(evaluation_dir,'input.png'))
-save_image(test_rec.data, join(evaluation_dir,'output_test.png'))
+        mu, logVar, y = cvae.encode(x)
+        z = cvae.reparameterization(mu, logVar)
 
-rec1, rec0 = label_switch(test_x.data, test_y, cvae, exDir=evaluation_dir)
+        sample1 = cvae.decode(torch.LongTensor(np.ones(y.size(), dtype=int)).type_as(z), z)    
+        sample2 = cvae.decode(torch.LongTensor(np.zeros(y.size(), dtype=int)).type_as(z), z)
 
-# for further eval
-# if e == 'evalMode' and classer is not None:
-#     classer.eval()
-#     yPred0 = classer(rec0)
-#     y0 = Variable(torch.LongTensor(yPred0.size()).fill_(0)).type_as(test_x)
-#     class0 = binary_class_score(yPred0, y0, thresh=0.5)
-#     yPred1 = classer(rec1)
-#     y1 = Variable(torch.LongTensor(yPred1.size()).fill_(1)).type_as(test_x)
-#     class1 = binary_class_score(yPred1, y1, thresh=0.5)
+        save_image(sample1.cpu().data, join(evaluation_dir,'sample1.png'))
+        save_image(sample2.cpu().data, join(evaluation_dir,'sample2.png'))
 
-#     f = open(join(exDir, 'eval.txt'), 'w')
-#     f.write('Test MSE:'+ str(F.mse_loss(outputs, xTest).data[0]))
-#     f.write('Class0:'+ str(class0.data[0]))
-#     f.write('Class1:'+ str(class1.data[0]))
-#     f.close()
+        arr = ['input.png', 'output_test.png', 'sample1.png', 'sample2.png']
+        toImage = Image.new('RGBA',(552,128))
+        for j in range(4):
+            fromImge = Image.open(join(evaluation_dir, arr[j]))
+            fromImge = fromImge.resize((128, 128),Image.ANTIALIAS)
+            loc = (128*j + 10, 0)
+            toImage.paste(fromImge, loc)
 
+        toImage.save('merged' + str(i) + '.png')
 
-# return (test_bce_loss).data[0]/test_x.size(0), classScoreTest.data[0]
+    arr = ['merged0.png', 'merged1.png', 'merged2.png']
+    toImage = Image.new('RGBA',(552,384))
+    for j in range(3):
+        fromImge = Image.open(arr[j])
+        loc = (0, 128*j)
+        toImage.paste(fromImge, loc)
+
+    toImage.save('merged.png')
+
+    filename = ImageTk.PhotoImage(Image.open('merged.png'))
+    canvas.image = filename
+    canvas.create_image(124,10,anchor='nw',image=filename)
+
+Button(root,text='choose',command=printcoords).pack()
+root.mainloop()

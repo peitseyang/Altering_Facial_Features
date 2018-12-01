@@ -17,3 +17,8 @@ src/model/__pycache__
 src/test/cvae_params
 
 src/test/evalFolder
+src/test/merged.png
+src/test/merged0.png
+src/test/merged1.png
+src/test/merged2.png
+src/test/merged3.png
