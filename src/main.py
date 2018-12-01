@@ -190,10 +190,8 @@ if __name__=='__main__':
 
 
     optimizer_cvae = torch.optim.Adam(cvae.parameters(), lr=opts.lr,  betas=(opts.b1, opts.b2), weight_decay=opts.weight_decay)
-    # optimizer_dis = torch.optim.RMSprop(dis.parameters(), lr=opts.lr, alpha=opts.momentum, weight_decay=opts.weight_decay)
     optimizer_dis = torch.optim.Adam(dis.parameters(), lr=opts.lr,  betas=(opts.b1, opts.b2), weight_decay=opts.weight_decay)
     optimizer_classifier = torch.optim.Adam(classifier.parameters(), lr=opts.lr,  betas=(opts.b1, opts.b2), weight_decay=opts.weight_decay)
-
 
     i = 1
     while os.path.isdir('./ex/' + str(i)):
@@ -206,10 +204,9 @@ if __name__=='__main__':
     f.write(saveOpts)
     f.close()
 
-    # 'test_class':[], 'test_bce':[], 
     losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'class':[], 'classifier':[]}
-    Ns = len(dataloader['train'])*opts.batch_size  #no samples
-    Nb = len(dataloader['train'])  #no batches
+    Ns = len(dataloader['train'])*opts.batch_size
+    Nb = len(dataloader['train'])
 
 
     full_time = time()
@@ -242,7 +239,6 @@ if __name__=='__main__':
 
             loss = nn.BCELoss()
             class_loss = loss(predict.type_as(x), y.type_as(x))
-            print(class_loss)
             en_de_coder_loss += opts.rho * class_loss
 
             # rec_mean, rec_log_var, rec_predict = cvae.encode(rec)
@@ -302,13 +298,10 @@ if __name__=='__main__':
         losses['total'].append(e_loss/Ns)
         losses['kl'].append(e_kl_loss/Ns)
         losses['bce'].append(e_rec_loss/Ns)
-        # losses['test_bce'].append(normbceLossTest)
         losses['dis'].append(e_dis_loss/Ns)
         losses['gen'].append(e_gen_loss/Ns)
         losses['class'].append(e_class_loss/Ns)
-        # losses['test_class'].append(classScoreTest)
         losses['classifier'].append(e_classifier_loss/Ns)
-        # losses['classifierEnc'].append(e_classifier_en_loss/Ns)
 
 
         fig1 = plt.figure()
@@ -326,13 +319,8 @@ if __name__=='__main__':
         fig2 = plt.figure()
         for key in losses:
             y = losses[key]
-            print(y)
             y -= np.mean(y)
-            print(np.mean(y))
-            print(y)
             y /= ( np.std(y) + 1e-6 ) 
-            print(np.std(y) + 1e-6)
-            print(y)
             noPoints = len(losses[key])
             factor = float(noPoints)/e
             plt.plot(np.arange(len(losses[key]))/factor,y, label=key)
@@ -340,8 +328,6 @@ if __name__=='__main__':
         plt.ylabel('normalised loss')
         plt.legend()
         fig2.savefig(join(output_path, 'norm_loss_plt.png'))
-
-	# normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], output_path, e='evalMode')
 
     print('full time', time() - full_time)
 
