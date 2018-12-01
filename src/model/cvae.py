@@ -12,7 +12,6 @@ class CVAE(nn.Module):
 
 	def __init__(self, latent_size, device, num_labels=1):
 		super(CVAE, self).__init__()
-		#define layers here
 
 		self.latent_size = latent_size
 		self.device = device

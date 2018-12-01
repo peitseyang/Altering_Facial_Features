@@ -52,10 +52,7 @@ t.start()
 # python3 main.py --epochs 45 --alpha 0.2 --delta 0.1 --rho 0.1
 
 def plot_losses(losses, exDir, epochs=1, title='loss'):
-    #losses should be a dictionary of losses 
-    # e.g. losses = {'loss1':[], 'loss2:'[], 'loss3':[], ... etc.}
     fig1 = plt.figure()
-    assert epochs > 0
     for key in losses:
         noPoints = len(losses[key])
         factor = float(noPoints)/epochs
@@ -68,14 +65,16 @@ def plot_losses(losses, exDir, epochs=1, title='loss'):
     fig1.savefig(join(exDir, title+'_plt.png'))
 
 def plot_norm_losses(losses, exDir, epochs=1, title='loss'):
-    #losses should be a dictionary of losses 
-    # e.g. losses = {'loss1':[], 'loss2:'[], 'loss3':[], ... etc.}
-    assert epochs > 0
     fig1 = plt.figure()
     for key in losses:
         y = losses[key]
+        print(y)
         y -= np.mean(y)
+        print(np.mean(y))
+        print(y)
         y /= ( np.std(y) + 1e-6 ) 
+        print(np.std(y) + 1e-6)
+        print(y)
         noPoints = len(losses[key])
         factor = float(noPoints)/epochs
         plt.plot(np.arange(len(losses[key]))/factor,y, label=key)
