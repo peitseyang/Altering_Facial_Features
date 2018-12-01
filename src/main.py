@@ -51,38 +51,6 @@ t.start()
 # python3 celeba_info_cVAEGAN.py --alpha 0.2 --batch_size 32 --beta 0 --delta 0.1 --fSize 32 --epochs 45 --rho 0.1
 # python3 main.py --epochs 45 --alpha 0.2 --delta 0.1 --rho 0.1
 
-def plot_losses(losses, exDir, epochs=1, title='loss'):
-    fig1 = plt.figure()
-    for key in losses:
-        noPoints = len(losses[key])
-        factor = float(noPoints)/epochs
-        plt.plot(np.arange(len(losses[key]))/factor,losses[key], label=key)
-
-    plt.xlabel('epoch')
-    plt.ylabel('loss')
-    plt.legend()
-    plt.title(title)
-    fig1.savefig(join(exDir, title+'_plt.png'))
-
-def plot_norm_losses(losses, exDir, epochs=1, title='loss'):
-    fig1 = plt.figure()
-    for key in losses:
-        y = losses[key]
-        print(y)
-        y -= np.mean(y)
-        print(np.mean(y))
-        print(y)
-        y /= ( np.std(y) + 1e-6 ) 
-        print(np.std(y) + 1e-6)
-        print(y)
-        noPoints = len(losses[key])
-        factor = float(noPoints)/epochs
-        plt.plot(np.arange(len(losses[key]))/factor,y, label=key)
-    plt.xlabel('epoch')
-    plt.ylabel('normalised loss')
-    plt.legend()
-    fig1.savefig(join(exDir, 'norm_'+title+'_plt.png'))
-
 def save_input_args(exDir, opts):
     #save the input args to 
     f = open(join(exDir,'opts.txt'),'w')
@@ -93,7 +61,7 @@ def save_input_args(exDir, opts):
     f.close()
 
 def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
-    print('switching label...1')
+    print('switching label')
     #get x's that have smile
     if (y.data == 0).all(): #if no samples with label 1 use all samples
         x0 = Variable(x)
@@ -341,9 +309,36 @@ if __name__=='__main__':
         losses['classifier'].append(e_classifier_loss/Ns)
         # losses['classifierEnc'].append(e_classifier_en_loss/Ns)
 
-        if e > 1:
-            plot_losses(losses, output_path, epochs=e+1)
-            plot_norm_losses(losses, output_path, epochs=e+1)
+
+        fig1 = plt.figure()
+        for key in losses:
+            noPoints = len(losses[key])
+            factor = float(noPoints)/epochs
+            plt.plot(np.arange(len(losses[key]))/factor,losses[key], label=key)
+
+        plt.xlabel('epoch')
+        plt.ylabel('loss')
+        plt.legend()
+        plt.title(title)
+        fig1.savefig(join(output_path, title+'_plt.png'))
+
+        fig2 = plt.figure()
+        for key in losses:
+            y = losses[key]
+            print(y)
+            y -= np.mean(y)
+            print(np.mean(y))
+            print(y)
+            y /= ( np.std(y) + 1e-6 ) 
+            print(np.std(y) + 1e-6)
+            print(y)
+            noPoints = len(losses[key])
+            factor = float(noPoints)/epochs
+            plt.plot(np.arange(len(losses[key]))/factor,y, label=key)
+        plt.xlabel('epoch')
+        plt.ylabel('normalised loss')
+        plt.legend()
+        fig2.savefig(join(output_path, 'norm_'+title+'_plt.png'))
 
 	# normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], output_path, e='evalMode')
 
