@@ -242,6 +242,7 @@ if __name__=='__main__':
 
             loss = nn.BCELoss()
             class_loss = loss(predict.type_as(x), y.type_as(x))
+            print(class_loss)
             en_de_coder_loss += opts.rho * class_loss
 
             # rec_mean, rec_log_var, rec_predict = cvae.encode(rec)
@@ -313,14 +314,14 @@ if __name__=='__main__':
         fig1 = plt.figure()
         for key in losses:
             noPoints = len(losses[key])
-            factor = float(noPoints)/epochs
+            factor = float(noPoints)/e
             plt.plot(np.arange(len(losses[key]))/factor,losses[key], label=key)
 
         plt.xlabel('epoch')
         plt.ylabel('loss')
         plt.legend()
-        plt.title(title)
-        fig1.savefig(join(output_path, title+'_plt.png'))
+        plt.title('loss')
+        fig1.savefig(join(output_path, 'loss_plt.png'))
 
         fig2 = plt.figure()
         for key in losses:
@@ -333,12 +334,12 @@ if __name__=='__main__':
             print(np.std(y) + 1e-6)
             print(y)
             noPoints = len(losses[key])
-            factor = float(noPoints)/epochs
+            factor = float(noPoints)/e
             plt.plot(np.arange(len(losses[key]))/factor,y, label=key)
         plt.xlabel('epoch')
         plt.ylabel('normalised loss')
         plt.legend()
-        fig2.savefig(join(output_path, 'norm_'+title+'_plt.png'))
+        fig2.savefig(join(output_path, 'norm_loss_plt.png'))
 
 	# normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], output_path, e='evalMode')
 
