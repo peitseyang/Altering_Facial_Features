@@ -259,7 +259,7 @@ if __name__=='__main__':
             e_rec_loss += rec_loss.item()
             e_gen_loss += gen_loss.item()
             e_dis_loss += dis_loss.item()
-            e_class_loss += class_loss.item()
+            # e_class_loss += class_loss.item()
             e_classifier_loss += classifier_loss.item()
             e_classifier_en_loss += classifier_en_loss.item()
 
@@ -277,7 +277,7 @@ if __name__=='__main__':
         losses['bce'].append(e_rec_loss/Ns)
         losses['dis'].append(e_dis_loss/Ns)
         losses['gen'].append(e_gen_loss/Ns)
-        losses['class'].append(e_class_loss/Ns)
+        # losses['class'].append(e_class_loss/Ns)
         losses['classifier'].append(e_classifier_loss/Ns)
 
 
