@@ -3,10 +3,10 @@ import torch
 from torch import nn
 
 class Discriminator(nn.Module):
-	def __init__(self, numLabels=1):
+	def __init__(self, num_labels=1):
 		super(Discriminator, self).__init__()
 
-		self.numLabels = numLabels
+		self.num_labels = num_labels
 		self.discriminate = nn.Sequential(
 			nn.Conv2d(3, 32, 5, stride=2, padding=2),
 			nn.ReLU(),
@@ -18,7 +18,7 @@ class Discriminator(nn.Module):
 			nn.ReLU()
 		)
 		self.flatten = nn.Sequential(
-			nn.Linear(256 * 4 * 4, numLabels),
+			nn.Linear(256 * 4 * 4, num_labels),
 			nn.Sigmoid()
 		)
 

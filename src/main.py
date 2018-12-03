@@ -51,15 +51,6 @@ t.start()
 # python3 celeba_info_cVAEGAN.py --alpha 0.2 --batch_size 32 --beta 0 --delta 0.1 --fSize 32 --epochs 45 --rho 0.1
 # python3 main.py --epochs 45 --alpha 0.2 --delta 0.1 --rho 0.1
 
-def save_input_args(exDir, opts):
-    #save the input args to 
-    f = open(join(exDir,'opts.txt'),'w')
-    saveOpts =''.join(''.join(str(opts).split('(')[1:])\
-        .split(')')[:-1])\
-        .replace(',','\n')
-    f.write(saveOpts)
-    f.close()
-
 def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
     print('switching label')
     #get x's that have smile
@@ -70,7 +61,7 @@ def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
         x0 = Variable(torch.index_select(x, dim=0, index=zeroIdx[:,0])).type_as(x)
 
     #get z
-    mu, logVar, y = cvae.encode(x0)
+    mu, logVar, y = cvae.encode(x0, y)
     z = cvae.reparameterization(mu, logVar)
 
     ySmile = Variable(torch.LongTensor(np.ones(y.size(), dtype=int))).type_as(z)
@@ -198,11 +189,11 @@ if __name__=='__main__':
         i += 1
     os.mkdir('./ex/' + str(i))
     output_path = './ex/' + str(i)
-    print('Outputs will be saved to:', output_path)
-    f = open(join(output_path,'opts.txt'),'w')
-    saveOpts =''.join(''.join(str(opts).split('(')[1:]).split(')')[:-1]).replace(',','\n')
-    f.write(saveOpts)
-    f.close()
+    # print('Outputs will be saved to:', output_path)
+    # f = open(join(output_path,'opts.txt'),'w')
+    # saveOpts =''.join(''.join(str(opts).split('(')[1:]).split(')')[:-1]).replace(',','\n')
+    # f.write(saveOpts)
+    # f.close()
 
     losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'class':[], 'classifier':[]}
     Ns = len(dataloader['train'])*opts.batch_size
