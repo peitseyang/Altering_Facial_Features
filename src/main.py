@@ -213,10 +213,10 @@ if __name__=='__main__':
             rec_loss, kl_loss = cvae.loss(rec, x, mean, log_var)
             en_de_coder_loss = rec_loss + opts.alpha * kl_loss
 
-            loss = nn.BCELoss()
-            print(c)
-            class_loss = loss(c.type_as(x), y.type_as(x))
-            en_de_coder_loss += opts.rho * class_loss
+            # loss = nn.BCELoss()
+            # print(c)
+            # class_loss = loss(c.type_as(x), y.type_as(x))
+            # en_de_coder_loss += opts.rho * class_loss
 
             # rec_mean, rec_log_var, rec_predict = cvae.encode(rec)
             # rec_class_loss = loss(rec_predict.type_as(x), y.type_as(x))
