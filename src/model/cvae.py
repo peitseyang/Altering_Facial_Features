@@ -22,11 +22,11 @@ class CVAE(nn.Module):
 		self.decode = Decoder(latent_size, num_labels)
 
 	def forward(self, x, y):
-		mean, log_var, c = self.encode(x, y)
+		mean, log_var = self.encode(x, y)
 		z = self.reparameterization(mean, log_var)
-		rec = self.decode(c, z)
+		rec = self.decode(y, z)
 
-		return rec, mean, log_var ,c
+		return rec, mean, log_var
 
 	def reparameterization(self, mean, log_var):
 		e = Variable(torch.randn(log_var.size(0), self.latent_size)).to(self.device)
