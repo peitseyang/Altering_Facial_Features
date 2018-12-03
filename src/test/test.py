@@ -1,13 +1,12 @@
 # pylint: disable=E0401, E0302
 import sys
-sys.path.append('../')
 
 import argparse
 from time import time
 import numpy as np
 
-from data.dataloader import TestData
-from model.cvae import CVAETEST as CVAE
+from dataloader import TestData
+from cvae import CVAETEST as CVAE
 
 from torchvision import transforms
 import torch.nn.functional as F
