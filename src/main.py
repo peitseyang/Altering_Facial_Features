@@ -232,13 +232,13 @@ if __name__=='__main__':
             y = Variable(y).view(y.size(0),1).to(device)
 
 
-            rec, mean, log_var, predict = cvae(x, y)
+            rec, mean, log_var, c = cvae(x, y)
             z = cvae.reparameterization(mean, log_var)
             rec_loss, kl_loss = cvae.loss(rec, x, mean, log_var)
             en_de_coder_loss = rec_loss + opts.alpha * kl_loss
 
             loss = nn.BCELoss()
-            class_loss = loss(predict.type_as(x), y.type_as(x))
+            class_loss = loss(c.type_as(x), y.type_as(x))
             en_de_coder_loss += opts.rho * class_loss
 
             # rec_mean, rec_log_var, rec_predict = cvae.encode(rec)

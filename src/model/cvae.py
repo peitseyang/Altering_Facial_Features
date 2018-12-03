@@ -21,12 +21,12 @@ class CVAE(nn.Module):
 		self.encode = Encoder(latent_size, num_labels)
 		self.decode = Decoder(latent_size, num_labels)
 
-	def forward(self, x, hat_y):
-		mean, log_var, y = self.encode(x)
+	def forward(self, x, y):
+		mean, log_var, c = self.encode(x, y)
 		z = self.reparameterization(mean, log_var)
-		rec = self.decode(y, z)
+		rec = self.decode(c, z)
 
-		return rec, mean, log_var ,y
+		return rec, mean, log_var ,c
 
 	def reparameterization(self, mean, log_var):
 		e = Variable(torch.randn(log_var.size(0), self.latent_size)).to(self.device)
@@ -71,7 +71,7 @@ class Encoder(nn.Module):
 			nn.Sigmoid()
 		)
 
-	def forward(self, x):
+	def forward(self, x, y):
 		x = self.encode(x)
 		x = x.view(x.size(0), -1)
 		mean = self.mean(x)
@@ -114,7 +114,6 @@ class CVAETEST(nn.Module):
 
 	def __init__(self, nz, imSize=64, fSize=32, sig=1):
 		super(CVAETEST, self).__init__()
-		#define layers here
 
 		self.fSize = fSize
 		self.nz = nz
@@ -146,26 +145,24 @@ class CVAETEST(nn.Module):
 		self.useCUDA = torch.cuda.is_available()
 
 	def encode(self, x):
-		#define the encoder here return mu(x) and sigma(x)
 		x = F.relu(self.enc1(x))
 		x = F.relu(self.enc2(x))
 		x = F.relu(self.enc3(x))
 		x = F.relu(self.enc4(x))
 		x = x.view(x.size(0), -1)
-		mu = self.encMu(x)  #no relu - mean may be negative
-		log_var = self.encLogVar(x) #no relu - log_var may be negative
+		mu = self.encMu(x)
+		log_var = self.encLogVar(x)
 		y = F.sigmoid(self.encY(x.detach()))
 		
 		return mu, log_var, y
 
 	def reparameterization(self, mu, log_var):
-		#do the re-parameterising here
-		sigma = torch.exp(log_var/2)  #sigma = exp(log_var/2) #torch.exp(log_var/2)
+		sigma = torch.exp(log_var/2)
 		if self.useCUDA:
 			eps = Variable(torch.randn(sigma.size(0), self.nz).cuda())
 		else: eps = Variable(torch.randn(sigma.size(0), self.nz))
 		
-		return mu + sigma * eps  #eps.mul(simga)._add(mu)
+		return mu + sigma * eps
 
 	def sample_z(self, noSamples, sig=1):
 		z =  sig * torch.randn(noSamples, self.nz)
@@ -175,7 +172,6 @@ class CVAETEST(nn.Module):
 			return Variable(z)
 
 	def decode(self, y, z):
-		#define the decoder here
 		z = torch.cat([y,z], dim=1)
 		z = F.relu(self.dec1(z))
 		z = z.view(z.size(0), -1, self.inSize, self.inSize)
@@ -187,7 +183,6 @@ class CVAETEST(nn.Module):
 		return z
 
 	def forward(self, x, hot_y):
-		# the outputs needed for training
 		mu, log_var, y = self.encode(x)
 		z = self.reparameterization(mu, log_var)
 		reconstruction = self.decode(y, z)
