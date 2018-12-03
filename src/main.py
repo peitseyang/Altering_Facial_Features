@@ -105,7 +105,7 @@ def evaluate(cvae, test_data, exDir, e=1):  #e is the epoch
 
 
     test_bce_loss, test_kl_loss = cvae.loss(test_rec, test_x, test_mean, test_log_var)
-    predict_label = torch.floor(test_predict)
+    # predict_label = torch.floor(test_predict)
 
     # classScoreTest= binary_class_score(predict_label, test_y, thresh=0.5)
     # print('classification test:', classScoreTest.data[0])
