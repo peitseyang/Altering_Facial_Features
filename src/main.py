@@ -59,9 +59,9 @@ def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
     # else:
     #     zeroIdx = torch.nonzero(y.data)
     #     x0 = Variable(torch.index_select(x, dim=0, index=zeroIdx[:,0])).type_as(x)
-    
+
     #get z
-    mu, logVar, y = cvae.encode(x0, y)
+    mu, logVar, y = cvae.encode(x, y)
     z = cvae.reparameterization(mu, logVar)
 
     ySmile = Variable(torch.LongTensor(np.ones(y.size(), dtype=int))).type_as(z)
