@@ -61,7 +61,7 @@ def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
     #     x0 = Variable(torch.index_select(x, dim=0, index=zeroIdx[:,0])).type_as(x)
 
     #get z
-    mu, logVar, y = cvae.encode(x, y)
+    mu, logVar = cvae.encode(x, y)
     z = cvae.reparameterization(mu, logVar)
 
     ySmile = Variable(torch.LongTensor(np.ones(y.size(), dtype=int))).type_as(z)
@@ -101,7 +101,7 @@ def evaluate(cvae, test_data, exDir, e=1):  #e is the epoch
     samples = cvae.decode(y_1, z).cpu()
     save_image(samples.data, join(exDir,'one_epoch'+str(e)+'.png'))
 
-    test_rec, test_mean, test_log_var, test_predict = cvae(test_x, test_y)
+    test_rec, test_mean, test_log_var = cvae(test_x, test_y)
 
 
     test_bce_loss, test_kl_loss = cvae.loss(test_rec, test_x, test_mean, test_log_var)
@@ -208,7 +208,7 @@ if __name__=='__main__':
             y = Variable(y).view(y.size(0),1).to(device)
 
 
-            rec, mean, log_var, c = cvae(x, y.type_as(x))
+            rec, mean, log_var = cvae(x, y)
             z = cvae.reparameterization(mean, log_var)
             rec_loss, kl_loss = cvae.loss(rec, x, mean, log_var)
             en_de_coder_loss = rec_loss + opts.alpha * kl_loss

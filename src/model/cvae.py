@@ -72,14 +72,13 @@ class Encoder(nn.Module):
 		)
 
 	def forward(self, x, y):
-		x = torch.cat([x, y], dim=1)
 		x = self.encode(x)
 		x = x.view(x.size(0), -1)
 		mean = self.mean(x)
 		log_var = self.log_var(x)
-		y0 = self.y(x.detach())
+		# y0 = self.y(x.detach())
 
-		return mean, log_var, y
+		return mean, log_var
 
 class Decoder(nn.Module):
 	def __init__(self, latent_size, num_labels):
@@ -104,6 +103,8 @@ class Decoder(nn.Module):
 		)
 
 	def forward(self, y, z):
+		print(np.shape(z))
+		print(np.shape(y))
 		x = torch.cat([y, z], dim=1)
 		x = self.decode1(x)
 		x = x.view(z.size(0), -1, 4, 4)
