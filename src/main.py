@@ -214,6 +214,7 @@ if __name__=='__main__':
             en_de_coder_loss = rec_loss + opts.alpha * kl_loss
 
             loss = nn.BCELoss()
+            print(c)
             class_loss = loss(c.type_as(x), y.type_as(x))
             en_de_coder_loss += opts.rho * class_loss
 
