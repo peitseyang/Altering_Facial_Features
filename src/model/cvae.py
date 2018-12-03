@@ -76,7 +76,7 @@ class Encoder(nn.Module):
 		x = x.view(x.size(0), -1)
 		mean = self.mean(x)
 		log_var = self.log_var(x)
-		y = self.y(x.detach())
+		y0 = self.y(x.detach())
 
 		return mean, log_var, y
 

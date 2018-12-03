@@ -79,10 +79,10 @@ def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
 
     return smileSamples, noSmileSamples
 
-def binary_class_score(pred, target, thresh=0.5):
-    predLabel = torch.gt(pred, thresh)
-    classScoreTest = torch.eq(predLabel, target.type_as(predLabel))
-    return  classScoreTest.float().sum()/target.size(0)
+# def binary_class_score(pred, target, thresh=0.5):
+#     predLabel = torch.gt(pred, thresh)
+#     classScoreTest = torch.eq(predLabel, target.type_as(predLabel))
+#     return  classScoreTest.float().sum()/target.size(0)
 
 def evaluate(cvae, test_data, exDir, e=1):  #e is the epoch
     cvae.eval()
@@ -107,32 +107,17 @@ def evaluate(cvae, test_data, exDir, e=1):  #e is the epoch
     test_bce_loss, test_kl_loss = cvae.loss(test_rec, test_x, test_mean, test_log_var)
     predict_label = torch.floor(test_predict)
 
-    classScoreTest= binary_class_score(predict_label, test_y, thresh=0.5)
-    print('classification test:', classScoreTest.data[0])
+    # classScoreTest= binary_class_score(predict_label, test_y, thresh=0.5)
+    # print('classification test:', classScoreTest.data[0])
 
     save_image(test_x.data, join(exDir,'input.png'))
     save_image(test_rec.data, join(exDir,'output_'+str(e)+'.png'))
 
     rec1, rec0 = label_switch(test_x.data, test_y, cvae, exDir=exDir)
 
-    # for further eval
-    # if e == 'evalMode' and classer is not None:
-    #     classer.eval()
-    #     yPred0 = classer(rec0)
-    #     y0 = Variable(torch.LongTensor(yPred0.size()).fill_(0)).type_as(test_x)
-    #     class0 = binary_class_score(yPred0, y0, thresh=0.5)
-    #     yPred1 = classer(rec1)
-    #     y1 = Variable(torch.LongTensor(yPred1.size()).fill_(1)).type_as(test_x)
-    #     class1 = binary_class_score(yPred1, y1, thresh=0.5)
 
-    #     f = open(join(exDir, 'eval.txt'), 'w')
-    #     f.write('Test MSE:'+ str(F.mse_loss(outputs, xTest).data[0]))
-    #     f.write('Class0:'+ str(class0.data[0]))
-    #     f.write('Class1:'+ str(class1.data[0]))
-    #     f.close()
-
-
-    return (test_bce_loss).data[0]/test_x.size(0), classScoreTest.data[0]
+    return (test_bce_loss).data[0]/test_x.size(0)
+    # , classScoreTest.data[0]
 
 if __name__=='__main__':
 
@@ -282,7 +267,7 @@ if __name__=='__main__':
                 print('[%d, %d] loss: %0.5f, bce: %0.5f, kl: %0.5f, gen: %0.5f, dis: %0.5f, classifier: %0.5f, time: %0.3f' % (e, i, e_loss/i, e_rec_loss/i, e_kl_loss/i, e_gen_loss/i, e_dis_loss/i,  e_classifier_loss/i, time() - epoch_time))
 
 
-        normbceLossTest, classScoreTest = evaluate(cvae, dataloader['test'], output_path, e=e)
+        normbceLossTest = evaluate(cvae, dataloader['test'], output_path, e=e)
 
         cvae.save_params(path=output_path)
 
