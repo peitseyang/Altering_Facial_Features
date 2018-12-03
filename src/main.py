@@ -73,7 +73,7 @@ def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
     
     if exDir is not None:
         print('saving rec w/ and w/out label switch to', join(exDir,'rec.png'),'... ')
-        save_image(x0.data, join(exDir, 'original.png'))
+        save_image(x.data, join(exDir, 'original.png'))
         save_image(smileSamples.cpu().data, join(exDir,'rec_1.png'))
         save_image(noSmileSamples.cpu().data, join(exDir,'rec_0.png'))
 
