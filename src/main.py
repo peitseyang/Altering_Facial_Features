@@ -208,7 +208,7 @@ if __name__=='__main__':
             y = Variable(y).view(y.size(0),1).to(device)
 
 
-            rec, mean, log_var, c = cvae(x, y)
+            rec, mean, log_var, c = cvae(x, y.type_as(x))
             z = cvae.reparameterization(mean, log_var)
             rec_loss, kl_loss = cvae.loss(rec, x, mean, log_var)
             en_de_coder_loss = rec_loss + opts.alpha * kl_loss
