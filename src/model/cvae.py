@@ -78,7 +78,7 @@ class Encoder(nn.Module):
 		log_var = self.log_var(x)
 		y0 = self.y(x.detach())
 
-		return mean, log_var, y
+		return mean, log_var, y.type_as(y0)
 
 class Decoder(nn.Module):
 	def __init__(self, latent_size, num_labels):
