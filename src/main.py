@@ -53,18 +53,13 @@ t.start()
 
 def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
     print('switching label')
-    print(np.shape(x))
-    print(np.shape(y))
-    #get x's that have smile
-    if (y.data == 0).all(): #if no samples with label 1 use all samples
-        x0 = Variable(x)
-    else:
-        zeroIdx = torch.nonzero(y.data)
-        x0 = Variable(torch.index_select(x, dim=0, index=zeroIdx[:,0])).type_as(x)
-
-    print(np.shape(x0))
-    print(np.shape(y))
-
+    # #get x's that have smile
+    # if (y.data == 0).all(): #if no samples with label 1 use all samples
+    #     x0 = Variable(x)
+    # else:
+    #     zeroIdx = torch.nonzero(y.data)
+    #     x0 = Variable(torch.index_select(x, dim=0, index=zeroIdx[:,0])).type_as(x)
+    
     #get z
     mu, logVar, y = cvae.encode(x0, y)
     z = cvae.reparameterization(mu, logVar)
