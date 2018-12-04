@@ -49,42 +49,10 @@ t = threading.Thread(target=animate)
 t.start()
 
 # python3 celeba_info_cVAEGAN.py --alpha 0.2 --batch_size 32 --beta 0 --delta 0.1 --fSize 32 --epochs 45 --rho 0.1
-# python3 main.py --epochs 45 --alpha 0.2 --delta 0.1 --rho 0.1
+# python3 main.py --epochs 45 --alpha 0.2 --gamma 0.1
 
-def label_switch(x,y,cvae,exDir=None): #when y is a unit not a vector
-    print('switching label')
-    # #get x's that have smile
-    # if (y.data == 0).all(): #if no samples with label 1 use all samples
-    #     x0 = Variable(x)
-    # else:
-    #     zeroIdx = torch.nonzero(y.data)
-    #     x0 = Variable(torch.index_select(x, dim=0, index=zeroIdx[:,0])).type_as(x)
 
-    #get z
-    mu, logVar = cvae.encode(x, y)
-    z = cvae.reparameterization(mu, logVar)
-
-    ySmile = Variable(torch.LongTensor(np.ones(y.size(), dtype=int))).type_as(z)
-    smileSamples = cvae.decode(ySmile, z)    
-    
-
-    yNoSmile = Variable(torch.LongTensor(np.zeros(y.size(), dtype=int))).type_as(z)
-    noSmileSamples = cvae.decode(yNoSmile, z)
-    
-    if exDir is not None:
-        print('saving rec w/ and w/out label switch to', join(exDir,'rec.png'),'... ')
-        save_image(x.data, join(exDir, 'original.png'))
-        save_image(smileSamples.cpu().data, join(exDir,'rec_1.png'))
-        save_image(noSmileSamples.cpu().data, join(exDir,'rec_0.png'))
-
-    return smileSamples, noSmileSamples
-
-# def binary_class_score(pred, target, thresh=0.5):
-#     predLabel = torch.gt(pred, thresh)
-#     classScoreTest = torch.eq(predLabel, target.type_as(predLabel))
-#     return  classScoreTest.float().sum()/target.size(0)
-
-def evaluate(cvae, test_data, exDir, e=1):  #e is the epoch
+def evaluate(cvae, test_data, output_path, e=1):  #e is the epoch
     cvae.eval()
 
     test_x, test_y = iter(test_data).next()
@@ -95,29 +63,35 @@ def evaluate(cvae, test_data, exDir, e=1):  #e is the epoch
 
     y_0 = Variable(torch.ones(test_y.size())).type_as(test_x)
     samples = cvae.decode(y_0, z).cpu()
-    save_image(samples.data, join(exDir,'zero_epoch'+str(e)+'.png'))
+    save_image(samples.data, join(output_path,'zero_epoch'+str(e)+'.png'))
 
     y_1 = Variable(torch.zeros(test_y.size())).type_as(test_x)
     samples = cvae.decode(y_1, z).cpu()
-    save_image(samples.data, join(exDir,'one_epoch'+str(e)+'.png'))
+    save_image(samples.data, join(output_path,'one_epoch'+str(e)+'.png'))
 
     test_rec, test_mean, test_log_var = cvae(test_x, test_y)
-
-
     test_bce_loss, test_kl_loss = cvae.loss(test_rec, test_x, test_mean, test_log_var)
-    # predict_label = torch.floor(test_predict)
 
-    # classScoreTest= binary_class_score(predict_label, test_y, thresh=0.5)
-    # print('classification test:', classScoreTest.data[0])
-
-    save_image(test_x.data, join(exDir,'input.png'))
-    save_image(test_rec.data, join(exDir,'output_'+str(e)+'.png'))
+    save_image(test_x.data, join(output_path,'input.png'))
+    save_image(test_rec.data, join(output_path,'output_'+str(e)+'.png'))
 
     rec1, rec0 = label_switch(test_x.data, test_y, cvae, exDir=exDir)
+    x = test_x.data
+    y = test_y
+    mean, log_var = cvae.encode(x, y)
+    z = cvae.reparameterization(mean, log_var)
 
+    ones = Variable(torch.LongTensor(np.ones(y.size(), dtype=int))).type_as(z)
+    ones_sample = cvae.decode(ones, z)    
+    
+    zeros = Variable(torch.LongTensor(np.zeros(y.size(), dtype=int))).type_as(z)
+    zeros_sample = cvae.decode(zeros, z)
+    
+    save_image(x.data, join(output_path, 'original.png'))
+    save_image(ones_sample.cpu().data, join(output_path,'rec_1.png'))
+    save_image(zeros_sample.cpu().data, join(output_path,'rec_0.png'))
 
     return (test_bce_loss).data[0]/test_x.size(0)
-    # , classScoreTest.data[0]
 
 if __name__=='__main__':
 
@@ -137,11 +111,9 @@ if __name__=='__main__':
     parser.add_argument('--b1', default=0.5, type=float)
     parser.add_argument('--b2', default=0.999, type=float)
 
-    parser.add_argument('--alpha', default=1, type=float, help='p1') #weight on the KL divergance
-    parser.add_argument('--rho', default=1, type=float, help='p2') #weight on the class loss for the vae
-    # parser.add_argument('--beta', default=1, type=float, help='p3')  #weight on the rec class loss to update VAE
-    parser.add_argument('--gamma', default=1, type=float, help='p4') #weight on the classifier enc loss
-    parser.add_argument('--delta', default=1, type=float, help='p5') #weight on the adversarial loss
+    parser.add_argument('--alpha', default=1, type=float, help='weight on the KL divergance')
+    parser.add_argument('--beta', default=1, type=float, help='weight on the classifier enc loss')
+    parser.add_argument('--gamma', default=1, type=float, help='weight on the adversarial loss')
 
 
     opts = parser.parse_args()
@@ -174,16 +146,9 @@ if __name__=='__main__':
         i += 1
     os.mkdir('./ex/' + str(i))
     output_path = './ex/' + str(i)
-    # print('Outputs will be saved to:', output_path)
-    # f = open(join(output_path,'opts.txt'),'w')
-    # saveOpts =''.join(''.join(str(opts).split('(')[1:]).split(')')[:-1]).replace(',','\n')
-    # f.write(saveOpts)
-    # f.close()
 
     losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'classifier':[]}
-    Ns = len(dataloader['train'])*opts.batch_size
-    Nb = len(dataloader['train'])
-
+    data_length = len(dataloader['train'])*opts.batch_size
 
     full_time = time()
 
@@ -214,17 +179,9 @@ if __name__=='__main__':
             en_de_coder_loss = rec_loss + opts.alpha * kl_loss
 
             loss = nn.BCELoss()
-            # print(c)
-            # class_loss = loss(c.type_as(x), y.type_as(x))
-            # en_de_coder_loss += opts.rho * class_loss
-
-            # rec_mean, rec_log_var, rec_predict = cvae.encode(rec)
-            # rec_class_loss = loss(rec_predict.type_as(x), y.type_as(x))
-            # en_de_coder_loss += opts.beta * rec_class_loss
-
             classifierY = classifier(z)
             classifier_en_loss = loss(classifierY.type_as(x), y.type_as(x))  
-            en_de_coder_loss -= opts.gamma * classifier_en_loss
+            en_de_coder_loss -= opts.beta * classifier_en_loss
             classifierY = classifier(z.detach())
             classifier_loss = loss(classifierY.type_as(x), y.type_as(x))
 
@@ -240,7 +197,7 @@ if __name__=='__main__':
             dis_fake_rec = dis(rec)
             dis_fake_randn = dis(cvae.decode(y.type_as(x), randn_z))
             gen_loss = 0.5 * (loss(dis_fake_rec, label_real) + loss(dis_fake_randn, label_real)) / dis_fake_rec.size(1)
-            en_de_coder_loss += opts.delta * gen_loss
+            en_de_coder_loss += opts.gamma * gen_loss
 
 
             optimizer_cvae.zero_grad()
@@ -259,7 +216,6 @@ if __name__=='__main__':
             e_rec_loss += rec_loss.item()
             e_gen_loss += gen_loss.item()
             e_dis_loss += dis_loss.item()
-            # e_class_loss += class_loss.item()
             e_classifier_loss += classifier_loss.item()
             e_classifier_en_loss += classifier_en_loss.item()
 
@@ -272,13 +228,12 @@ if __name__=='__main__':
 
         cvae.save_params(path=output_path)
 
-        losses['total'].append(e_loss/Ns)
-        losses['kl'].append(e_kl_loss/Ns)
-        losses['bce'].append(e_rec_loss/Ns)
-        losses['dis'].append(e_dis_loss/Ns)
-        losses['gen'].append(e_gen_loss/Ns)
-        # losses['class'].append(e_class_loss/Ns)
-        losses['classifier'].append(e_classifier_loss/Ns)
+        losses['total'].append(e_loss/data_length)
+        losses['kl'].append(e_kl_loss/data_length)
+        losses['bce'].append(e_rec_loss/data_length)
+        losses['dis'].append(e_dis_loss/data_length)
+        losses['gen'].append(e_gen_loss/data_length)
+        losses['classifier'].append(e_classifier_loss/data_length)
 
 
         fig1 = plt.figure()
