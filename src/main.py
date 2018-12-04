@@ -180,7 +180,7 @@ if __name__=='__main__':
     # f.write(saveOpts)
     # f.close()
 
-    losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'class':[], 'classifier':[]}
+    losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'classifier':[]}
     Ns = len(dataloader['train'])*opts.batch_size
     Nb = len(dataloader['train'])
 
