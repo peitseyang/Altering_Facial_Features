@@ -166,6 +166,10 @@ if __name__=='__main__':
         epoch_time = time()
 
         for i, data in enumerate(dataloader['train'], 0):
+            optimizer_cvae.zero_grad()
+            optimizer_classifier.zero_grad()
+            optimizer_dis.zero_grad()
+
             x, y = data
             x = Variable(x).to(device)
             y = Variable(y).view(y.size(0),1).to(device)
@@ -198,13 +202,10 @@ if __name__=='__main__':
             en_de_coder_loss += opts.gamma * gen_loss
 
 
-            optimizer_cvae.zero_grad()
             en_de_coder_loss.backward()
             optimizer_cvae.step()
-            optimizer_classifier.zero_grad()
             classifier_loss.backward()
             optimizer_classifier.step()
-            optimizer_dis.zero_grad()
             dis_loss.backward()
             optimizer_dis.step()
 
