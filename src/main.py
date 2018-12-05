@@ -75,7 +75,7 @@ def evaluate(cvae, test_data, output_path, e=1):  #e is the epoch
     save_image(test_x.data, join(output_path,'input.png'))
     save_image(test_rec.data, join(output_path,'output_'+str(e)+'.png'))
 
-    rec1, rec0 = label_switch(test_x.data, test_y, cvae, exDir=exDir)
+    # rec1, rec0 = label_switch(test_x.data, test_y, cvae, exDir=exDir)
     x = test_x.data
     y = test_y
     mean, log_var = cvae.encode(x, y)
