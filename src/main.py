@@ -48,11 +48,10 @@ def animate():
 t = threading.Thread(target=animate)
 t.start()
 
-# python3 celeba_info_cVAEGAN.py --alpha 0.2 --batch_size 32 --beta 0 --delta 0.1 --fSize 32 --epochs 45 --rho 0.1
 # python3 main.py --epochs 45 --alpha 0.2 --gamma 0.1
 
 
-def evaluate(cvae, test_data, output_path, e=1):  #e is the epoch
+def evaluate(cvae, test_data, output_path, e=1):
     cvae.eval()
 
     test_x, test_y = iter(test_data).next()
@@ -75,7 +74,6 @@ def evaluate(cvae, test_data, output_path, e=1):  #e is the epoch
     save_image(test_x.data, join(output_path,'input.png'))
     save_image(test_rec.data, join(output_path,'output_'+str(e)+'.png'))
 
-    # rec1, rec0 = label_switch(test_x.data, test_y, cvae, exDir=exDir)
     x = test_x.data
     y = test_y
     mean, log_var = cvae.encode(x, y)

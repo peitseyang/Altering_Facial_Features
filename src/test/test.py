@@ -37,9 +37,6 @@ import random
 from time import sleep
 
 
-# python3 celeba_info_cVAEGAN.py --alpha 0.2 --batch_size 32 --beta 0 --delta 0.1 --fSize 32 --epochs 45 --rho 0.1
-
-
 print('pytorch version : ' + str(torch.__version__))
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
