@@ -115,18 +115,18 @@ def printcoords():
         save_image(sample1.cpu().data, join(evaluation_dir,'sample1.png'))
         save_image(sample2.cpu().data, join(evaluation_dir,'sample2.png'))
 
-        arr = ['input.png', 'output_test.png', 'sample1.png', 'sample2.png']
-        toImage = Image.new('RGBA',(552,128))
-        for j in range(4):
+        arr = ['input.png', 'sample1.png', 'sample2.png']
+        toImage = Image.new('RGBA',(584,128))
+        for j in range(3):
             fromImge = Image.open(join(evaluation_dir, arr[j]))
             fromImge = fromImge.resize((128, 128),Image.ANTIALIAS)
-            loc = (128*j + 10, 0)
+            loc = (128*j + 80, 0)
             toImage.paste(fromImge, loc)
 
         toImage.save('merged' + str(i) + '.png')
 
     arr = ['merged0.png', 'merged1.png', 'merged2.png']
-    toImage = Image.new('RGBA',(552,384))
+    toImage = Image.new('RGBA',(584,384))
     for j in range(3):
         fromImge = Image.open(arr[j])
         loc = (0, 128*j)
