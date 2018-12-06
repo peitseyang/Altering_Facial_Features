@@ -66,17 +66,12 @@ class Encoder(nn.Module):
 		)
 		self.mean = nn.Linear(256*4*4, latent_size)
 		self.log_var = nn.Linear(256*4*4, latent_size)
-		self.y = nn.Sequential(
-			nn.Linear(256*4*4, num_labels),
-			nn.Sigmoid()
-		)
 
 	def forward(self, x, y):
 		x = self.encode(x)
 		x = x.view(x.size(0), -1)
 		mean = self.mean(x)
 		log_var = self.log_var(x)
-		# y0 = self.y(x.detach())
 
 		return mean, log_var
 
