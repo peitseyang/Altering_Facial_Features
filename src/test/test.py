@@ -48,7 +48,7 @@ parser.add_argument('--CVAE_PATH', default='/Users/alexyang/Desktop/final_projec
 opts = parser.parse_args()
 
 root = Tk()
-root.title('張元英我愛你')
+root.title('Demo')
 root.resizable(False, False)
 windowWidth = 800
 windowHeight = 500

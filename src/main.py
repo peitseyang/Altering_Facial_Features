@@ -145,7 +145,7 @@ if __name__=='__main__':
     os.mkdir('./ex/' + str(i))
     output_path = './ex/' + str(i)
 
-    losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'classifier':[]}
+    losses = {'total':[], 'kl':[], 'bce':[], 'dis':[], 'gen':[], 'classifier':[], 'test':[]}
     data_length = len(dataloader['train'])*opts.batch_size
 
     full_time = time()
@@ -233,6 +233,7 @@ if __name__=='__main__':
         losses['dis'].append(e_dis_loss/data_length)
         losses['gen'].append(e_gen_loss/data_length)
         losses['classifier'].append(e_classifier_loss/data_length)
+        losses['test'].append(normbceLossTest)
 
 
         fig1 = plt.figure()
