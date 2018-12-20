@@ -48,9 +48,6 @@ def animate():
 t = threading.Thread(target=animate)
 t.start()
 
-# python3 main.py --epochs 45 --alpha 0.2 --gamma 0.1
-
-
 def evaluate(cvae, test_data, output_path, e=1):
     cvae.eval()
 
@@ -174,7 +171,6 @@ if __name__=='__main__':
             x = Variable(x).to(device)
             y = Variable(y).view(y.size(0),1).to(device)
 
-
             rec, mean, log_var = cvae(x, y)
             z = cvae.reparameterization(mean, log_var)
             rec_loss, kl_loss = cvae.loss(rec, x, mean, log_var)
@@ -200,7 +196,6 @@ if __name__=='__main__':
             dis_fake_randn = dis(cvae.decode(y.type_as(x), randn_z))
             gen_loss = 0.5 * (loss(dis_fake_rec, label_real) + loss(dis_fake_randn, label_real)) / dis_fake_rec.size(1)
             en_de_coder_loss += opts.gamma * gen_loss
-
 
             en_de_coder_loss.backward()
             optimizer_cvae.step()

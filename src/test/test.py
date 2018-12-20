@@ -6,7 +6,7 @@ from time import time
 import numpy as np
 
 from dataloader import TestData
-from cvae import CVAETEST as CVAE
+from cvae import CVAE
 
 from torchvision import transforms
 import torch.nn.functional as F
